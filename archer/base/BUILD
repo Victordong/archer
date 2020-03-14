@@ -1,21 +1,7 @@
 cc_library(
     name = "base",
     srcs = [
-        "AsyncLogging.cc",
-        "Condition.cc",
-        "CountDownLatch.cc",
-        "CurrentThread.cc",
-        "Date.cc",
-        "Exception.cc",
-        "FileUtil.cc",
-        "LogFile.cc",
-        "LogStream.cc",
-        "Logging.cc",
-        "ProcessInfo.cc",
-        "Thread.cc",
-        "ThreadPool.cc",
-        "TimeZone.cc",
-        "Timestamp.cc",
+        
     ],
     hdrs = glob(["*.h"]),
     linkopts = ["-pthread"],
