@@ -26,8 +26,8 @@ int main(int argc, char const* argv[]) {
     howlong.it_value.tv_sec = 5;
     int result = timerfd_settime(timerfd, 0, &howlong, nullptr);
 
-    loop.loop();
+    loop.Loop();
 
-    ::close(timerfd);
+    close(timerfd);
     return 0;
 }

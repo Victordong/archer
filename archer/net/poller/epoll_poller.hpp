@@ -1,5 +1,9 @@
-#include "archer/net/poller/poller.hpp"
+#ifndef _ARCHER_EPOLL_POLLER_HPP
+#define _ARCHER_EPOLL_POLLER_HPP
+
+#pragma once
 #include <vector>
+#include "archer/net/poller/poller.hpp"
 
 namespace archer {
 
@@ -14,18 +18,22 @@ class EpollPoller : Poller {
 
     virtual void RemoveChannel(Channel&) override;
 
-    virtual int poll(int timeoutMs, ChannelList& activeChannels) override;
+    virtual void Poll(int timeoutMs, ChannelList& activeChannels) override;
 
    private:
     static const int kInitSize_ = 16;
 
     void update(int, Channel&);
 
+    int epfd() { return epfd_.get()->fd(); };
+
     void fillActiveChannels(int numEvents, ChannelList& activeChannels) const;
 
     using EventList = std::vector<epoll_event>;
 
     EventList events_;
-    int epfd_;
+    SocketPtr epfd_;
 };
 };  // namespace archer
+
+#endif  // _ARCHER_EPOLL_POLLER_HPP
