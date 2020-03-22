@@ -1,4 +1,5 @@
-
+#ifndef _ARCHER_NONCOPYABLE_HPP
+#define _ARCHER_NONCOPYABLE_HPP
 namespace archer {
 
 class noncopyable {
@@ -10,3 +11,5 @@ class noncopyable {
 };
 
 };  // namespace archer
+
+#endif  // _ARCHER_NONCOPYABLE_HPP

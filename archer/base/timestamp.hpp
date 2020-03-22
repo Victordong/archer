@@ -18,18 +18,25 @@ class Timestamp final {
 
     static const int kMicroSecondsPerSecond = 1000 * 1000;
 
-    bool operator<(Timestamp& other) {
+    bool operator<(const Timestamp& other) const {
         return micro_seconds_ < other.micro_seconds_;
     };
 
-    bool operator>(Timestamp& other) {
+    bool operator>(const Timestamp& other) const {
         return micro_seconds_ > other.micro_seconds_;
     };
 
-    Timestamp& operator+=(int delay) {
+    Timestamp& operator+(int delay) {
         micro_seconds_ += micro_seconds_ + delay;
         return *this;
     }
+
+    int expiration() {
+        struct timeval tv;
+        gettimeofday(&tv, nullptr);
+        int ms = int(tv.tv_sec) * kMicroSecondsPerSecond + int(tv.tv_usec);
+        return micro_seconds_ - ms;
+    };
 
     void swap(Timestamp& first, Timestamp& second) {
         using std::swap;
