@@ -8,11 +8,11 @@ namespace archer {
 
 class CurrentThread final {
    public:
-    static unsigned long long tid() {
+    static pid_t tid() {
         std::ostringstream oss;
         oss << std::this_thread::get_id();
         std::string stid = oss.str();
-        unsigned long long tid = std::stoull(stid);
+        pid_t tid = std::stoull(stid);
         return tid;
     };
 };

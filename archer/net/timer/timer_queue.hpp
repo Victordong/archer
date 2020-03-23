@@ -4,7 +4,7 @@
 #include <sys/time.h>
 #include <unistd.h>
 #include <functional>
-#include <map>
+#include <set>
 #include "archer/net/eventloop/channel.hpp"
 
 namespace archer {
@@ -14,7 +14,7 @@ class Timer;
 
 class TimerQueue : noncopyable {
    public:
-    using Entry = std::pair<Timestamp, unsigned int>;
+    using Entry = std::pair<Timestamp, TimerPtr>;
 
     struct TimerCompare {
         bool operator()(const Entry& lhs, const Entry& rhs) const {
@@ -22,7 +22,7 @@ class TimerQueue : noncopyable {
         };
     };
 
-    using TimerList = std::map<Entry, std::shared_ptr<Timer>, TimerCompare>;
+    using TimerList = std::set<Entry,TimerCompare>;
 
     TimerQueue(Eventloop& loop);
     ~TimerQueue();

@@ -83,7 +83,7 @@ class Eventloop final : noncopyable {
 
     std::mutex mutex_;
 
-    const long long tid_;
+    const pid_t tid_;
 };
 };  // namespace archer
 
