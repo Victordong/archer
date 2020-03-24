@@ -31,7 +31,7 @@ class Timer;
 
 using TimerPtr = std::shared_ptr<Timer>;
 
-using TimerId = std::weak_ptr<Timer>;
+using TimerId = std::shared_ptr<Timer>;
 
 class Eventloop final : noncopyable {
    public:

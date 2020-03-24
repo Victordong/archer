@@ -17,10 +17,10 @@ Eventloop::Eventloop()
     assert(wakeup_fd() > 0);
     poller_->AddChannel(*wakeup_channel_);
     wakeup_channel_->set_read_callback([&]() {
-        char read_in[8];
+        uint64_t buf;
         int size;
         do {
-            size = ::read(wakeup_channel_->fd(), read_in, sizeof read_in);
+            size = ::read(wakeup_channel_->fd(), &buf, sizeof buf);
         } while (size != 0);
     });
     wakeup_channel_->EnableReading();
@@ -52,11 +52,13 @@ void Eventloop::quit() {
     }
 }
 
-void Eventloop::HandleRead() {}
+void Eventloop::HandleRead() {
+    
+}
 
 void Eventloop::wakeup() {
-    char wake_up[] = {0, 0, 0, 0, 0, 0, 0, 1};
-    ::write(wakeup_fd(), wake_up, sizeof wake_up);
+    uint64_t buf = 1;
+    ::write(wakeup_fd(), &buf, sizeof buf);
 }
 
 void Eventloop::AddChannel(Channel& channel) {
@@ -124,4 +126,6 @@ TimerId Eventloop::RunEvery(double interval, const TimerCallback& cb) {
     return timer_queue_->AddTimer(cb, Timestamp::Now() + interval, interval);
 }
 
-void Eventloop::CancelTimer(TimerId& ti) {}
+void Eventloop::CancelTimer(TimerId& ti) {
+    timer_queue_->CancelTimer(ti);
+}

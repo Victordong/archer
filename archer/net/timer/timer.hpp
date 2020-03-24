@@ -11,12 +11,13 @@ class Timer : noncopyable {
    public:
     enum TimerStatus {
         Finished,
+        Running,
         Canceled,
         Pending,
         Error,
     };
 
-    Timer(const TimerCallback& cb, const Timestamp& when, int interval);
+    Timer(const TimerCallback& cb, const Timestamp& when, int interval, TimerStatus status=Pending);
 
     int expiration();
 
@@ -24,18 +25,27 @@ class Timer : noncopyable {
 
     Timestamp when() { return when_; };
 
+    void set_when(Timestamp when) { when_ = when; };
+
     TimerStatus status() { return status_; };
 
     unsigned int total_num() { return total_num_; };
 
+    void timer_callback() { timer_callback_(); };
+
+    bool repeat() { return repeat_; };
+
    private:
+    static unsigned int total_num_;
+
     void set_status(TimerStatus status) { status_ = status; };
 
     Timestamp when_;
     TimerCallback timer_callback_;
+
     int interval_;
     bool repeat_;
-    static unsigned int total_num_;
+
     TimerStatus status_;
 };
 

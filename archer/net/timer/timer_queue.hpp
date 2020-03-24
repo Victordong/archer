@@ -4,25 +4,20 @@
 #include <sys/time.h>
 #include <unistd.h>
 #include <functional>
-#include <set>
+#include <map>
 #include "archer/net/eventloop/channel.hpp"
 
 namespace archer {
 
 class Timer;
 
-
 class TimerQueue : noncopyable {
    public:
-    using Entry = std::pair<Timestamp, TimerPtr>;
+    using Entry = std::pair<Timestamp, Timer*>;
 
-    struct TimerCompare {
-        bool operator()(const Entry& lhs, const Entry& rhs) const {
-            return lhs.first < rhs.first;
-        };
-    };
+    using TimerMap = std::map<Entry, TimerPtr, std::less<Entry>>;
 
-    using TimerList = std::set<Entry,TimerCompare>;
+    using TimerList = std::vector<Entry>;
 
     TimerQueue(Eventloop& loop);
     ~TimerQueue();
@@ -35,7 +30,7 @@ class TimerQueue : noncopyable {
 
     void CancelTimer(const TimerId& ti);
 
-    
+    void CancelTimerInLoop(const TimerId& ti);
 
    private:
     void HandleRead();
@@ -45,12 +40,13 @@ class TimerQueue : noncopyable {
     bool Insert(const TimerPtr& timer);
     void ResetTimerfd(int timestamp);
 
+
     int timerfd() { return timerfd_.get()->fd(); };
 
     Eventloop& loop_;
     SocketPtr timerfd_;
     Channel timerfd_channel_;
-    TimerList timers_;
+    TimerMap timers_;
 
     std::vector<TimerId> expire_timers_;
 };
