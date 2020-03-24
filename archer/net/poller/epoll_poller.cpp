@@ -2,9 +2,8 @@
 
 using namespace archer;
 
-EpollPoller::EpollPoller(Eventloop& loop)
-    : Poller(loop),
-      epfd_(new Socket(epoll_create1(EPOLL_CLOEXEC))),
+EpollPoller::EpollPoller()
+    : epfd_(new Socket(epoll_create1(EPOLL_CLOEXEC))),
       events_(EventList(kInitSize_)) {
     if (epfd_ < 0) {
     }

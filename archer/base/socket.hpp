@@ -5,7 +5,7 @@
 class Socket {
    public:
     Socket(int fd) : fd_(fd){};
-    ~Socket() { ::close(fd_); };
+    ~Socket() { ::close(fd_);};
 
     int fd() { return fd_; };
 

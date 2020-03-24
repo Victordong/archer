@@ -11,7 +11,6 @@
 #include <mutex>
 #include <vector>
 #include "archer/base/noncopyable.hpp"
-#include "archer/base/thread/current_thread.hpp"
 #include "archer/net/type.hpp"
 
 namespace archer {
@@ -21,7 +20,7 @@ static const int kWriteEvent = EPOLLOUT;
 static const int kErrorEvent = EPOLLERR;
 static const int kNoneEvent = 0;
 
-class EpollPoller;
+class Poller;
 
 class Channel;
 
@@ -32,6 +31,8 @@ class Timer;
 using TimerPtr = std::shared_ptr<Timer>;
 
 using TimerId = std::shared_ptr<Timer>;
+
+using ChannelPtr = std::shared_ptr<Channel>;
 
 class Eventloop final : noncopyable {
    public:
@@ -54,8 +55,6 @@ class Eventloop final : noncopyable {
     void RunInLoop(const Functor& func);
     void QueueInLoop(const Functor& func);
 
-    long long tid() { return tid_; };
-
    private:
     using ChannelList = std::vector<Channel*>;
 
@@ -72,18 +71,16 @@ class Eventloop final : noncopyable {
     std::atomic_bool looping_;
     std::atomic_bool do_pending_;
 
+    std::shared_ptr<Poller> poller_;
+    ChannelList active_channels_;
+
     SocketPtr wakeup_fd_;
     std::unique_ptr<Channel> wakeup_channel_;
-
-    std::unique_ptr<EpollPoller> poller_;
-    ChannelList active_channels_;
 
     std::unique_ptr<TimerQueue> timer_queue_;
     std::vector<Functor> pending_functors_;
 
     std::mutex mutex_;
-
-    const pid_t tid_;
 };
 };  // namespace archer
 

@@ -6,14 +6,13 @@
 using namespace archer;
 
 Eventloop::Eventloop()
-    : poller_(new EpollPoller(*this)),
-      timer_queue_(new TimerQueue(*this)),
-      wakeup_fd_(new Socket(eventfd(0, EFD_NONBLOCK | EFD_CLOEXEC))),
-      wakeup_channel_(new Channel(*this, wakeup_fd())),
-      quit_(true),
+    : quit_(true),
       looping_(false),
       do_pending_(false),
-      tid_(CurrentThread::tid()) {
+      poller_(new Poller()),
+      timer_queue_(new TimerQueue(this)),
+      wakeup_fd_(new Socket(eventfd(0, EFD_NONBLOCK | EFD_CLOEXEC))),
+      wakeup_channel_(new Channel(this, wakeup_fd())) {
     assert(wakeup_fd() > 0);
     poller_->AddChannel(*wakeup_channel_);
     wakeup_channel_->set_read_callback([&]() {
@@ -29,17 +28,15 @@ Eventloop::Eventloop()
 Eventloop::~Eventloop() {}
 
 void Eventloop::Loop() {
-    assert(tid_ == CurrentThread::tid());
-
     quit_ = false;
     looping_ = true;
 
     while (!quit_) {
-        active_channels_.clear();
         poller_->Poll(kPollTimeMs, active_channels_);
         for (auto channel : active_channels_) {
             channel->HandleEvent();
         }
+        active_channels_.clear();
         DoPendingFunctors();
     }
 }
@@ -47,14 +44,10 @@ void Eventloop::Loop() {
 void Eventloop::quit() {
     quit_ = true;
 
-    if (tid_!= CurrentThread::tid()) {
-        wakeup();
-    }
+    wakeup();
 }
 
-void Eventloop::HandleRead() {
-    
-}
+void Eventloop::HandleRead() {}
 
 void Eventloop::wakeup() {
     uint64_t buf = 1;
@@ -62,29 +55,19 @@ void Eventloop::wakeup() {
 }
 
 void Eventloop::AddChannel(Channel& channel) {
-    assert(tid_ == CurrentThread::tid());
-
     poller_->AddChannel(channel);
 }
 
 void Eventloop::RemoveChannel(Channel& channel) {
-    assert(tid_ == CurrentThread::tid());
-
     poller_->RemoveChannel(channel);
 }
 
 void Eventloop::UpdateChannel(Channel& channel) {
-    assert(tid_ == CurrentThread::tid());
-
     poller_->UpdateChannel(channel);
 }
 
 void Eventloop::RunInLoop(const Functor& func) {
-    if (tid_ == CurrentThread::tid()) {
-        func();
-    } else {
-        QueueInLoop(func);
-    }
+    QueueInLoop(func);
 }
 
 void Eventloop::QueueInLoop(const Functor& func) {
@@ -93,9 +76,7 @@ void Eventloop::QueueInLoop(const Functor& func) {
         pending_functors_.push_back(func);
     }
 
-    if (do_pending_ || tid_ != CurrentThread::tid()) {
-        wakeup();
-    }
+    wakeup();
 }
 
 void Eventloop::DoPendingFunctors() {

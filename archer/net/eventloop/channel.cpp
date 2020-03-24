@@ -2,17 +2,15 @@
 
 using namespace archer;
 
-Channel::Channel(Eventloop& loop, int fd)
-    : loop_(loop), fd_(new Socket(fd)), events_(0), revents_(0) {
-    loop_.AddChannel(*this);
-}
+Channel::Channel(Eventloop* loop, int fd)
+    : loop_(loop), fd_(new Socket(fd)), events_(0), revents_(0) {}
 
 Channel::~Channel() {
-    loop_.RemoveChannel(*this);
+    loop_->RemoveChannel(*this);
 }
 
 void Channel::update() {
-    loop_.UpdateChannel(*this);
+    loop_->UpdateChannel(*this);
 }
 
 void Channel::HandleEvent() {

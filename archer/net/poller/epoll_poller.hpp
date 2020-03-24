@@ -7,9 +7,9 @@
 
 namespace archer {
 
-class EpollPoller : Poller {
+class EpollPoller : public PollerImp {
    public:
-    EpollPoller(Eventloop&);
+    EpollPoller();
     ~EpollPoller();
 
     virtual void AddChannel(Channel&) override;

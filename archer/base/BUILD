@@ -6,6 +6,8 @@ cc_library(
     ],
     hdrs = [
         "noncopyable.hpp",
+        "socket.hpp",
+        "timestamp.hpp",
     ],
     linkopts = ["-pthread"],
     visibility = ["//visibility:public"],

@@ -9,7 +9,7 @@ namespace archer {
 
 class Channel : noncopyable {
    public:
-    Channel(Eventloop& loop, int fd);
+    Channel(Eventloop* loop, int fd);
     ~Channel();
 
     void HandleEvent();
@@ -42,12 +42,12 @@ class Channel : noncopyable {
         update();
     }
 
-    Eventloop& eventloop() { return loop_; };
+    Eventloop* eventloop() { return loop_; };
 
    private:
     void update();
 
-    Eventloop& loop_;
+    Eventloop* loop_;
     const SocketPtr fd_;
     int events_;
     int revents_;

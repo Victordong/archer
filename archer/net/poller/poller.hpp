@@ -8,13 +8,11 @@
 
 namespace archer {
 
-class Poller : noncopyable {
+class PollerImp : noncopyable {
    public:
     using ChannelList = std::vector<Channel*>;
 
-    Poller(Eventloop& loop) : loop_(loop){};
-
-    ~Poller();
+    PollerImp() {};
 
     virtual void AddChannel(Channel&) = 0;
 
@@ -27,10 +25,30 @@ class Poller : noncopyable {
    protected:
     using ChannelMap = std::map<int, Channel*>;
     ChannelMap channels_;
+};
+
+class Poller : noncopyable {
+   public:
+    using ChannelList = std::vector<Channel*>;
+
+    Poller();
+
+    ~Poller();
+
+    void AddChannel(Channel& ch) { imp_->AddChannel(ch); };
+
+    void UpdateChannel(Channel& ch) { imp_->UpdateChannel(ch); };
+
+    void RemoveChannel(Channel& ch) { imp_->RemoveChannel(ch); };
+
+    void Poll(int timeoutMs, ChannelList& activeChannels) {
+        imp_->Poll(timeoutMs, activeChannels);
+    };
 
    private:
-    Eventloop& loop_;
+    std::unique_ptr<PollerImp> imp_;
 };
+
 };  // namespace archer
 
 #endif  // _ARCHER_POLLER_HPP

@@ -19,7 +19,7 @@ class TimerQueue : noncopyable {
 
     using TimerList = std::vector<Entry>;
 
-    TimerQueue(Eventloop& loop);
+    TimerQueue(Eventloop* loop);
     ~TimerQueue();
 
     TimerId AddTimer(const TimerCallback& cb,
@@ -43,7 +43,7 @@ class TimerQueue : noncopyable {
 
     int timerfd() { return timerfd_.get()->fd(); };
 
-    Eventloop& loop_;
+    Eventloop* loop_;
     SocketPtr timerfd_;
     Channel timerfd_channel_;
     TimerMap timers_;
