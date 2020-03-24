@@ -17,10 +17,7 @@ Eventloop::Eventloop()
     poller_->AddChannel(*wakeup_channel_);
     wakeup_channel_->set_read_callback([&]() {
         uint64_t buf;
-        int size;
-        do {
-            size = ::read(wakeup_channel_->fd(), &buf, sizeof buf);
-        } while (size != 0);
+        ::read(wakeup_channel_->fd(), &buf, sizeof buf);
     });
     wakeup_channel_->EnableReading();
 }
