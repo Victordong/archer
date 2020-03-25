@@ -22,7 +22,9 @@ TimerId TimerQueue::AddTimer(const TimerCallback& cb,
                              int interval) {
     TimerPtr timer_ptr(new Timer(cb, ts, interval));
 
-    loop_->RunInLoop([&]() { this->AddTimerInLoop(timer_ptr); });
+    loop_->RunInLoop([=]() {
+        this->AddTimerInLoop(timer_ptr);
+    });
 
     return std::shared_ptr<Timer>(timer_ptr);
 }
@@ -89,7 +91,7 @@ void TimerQueue::HandleRead() {
 
     GetExpired(Timestamp::Now());
     for (auto timer : expire_timers_) {
-        loop_->RunInLoop([&]() {
+        loop_->RunInLoop([=]() {
             timer->timer_callback();
             if (timer->repeat()) {
                 timer->set_status(Timer::Running);

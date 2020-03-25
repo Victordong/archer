@@ -12,10 +12,11 @@ using TimerCallback = std::function<void()>;
 
 using EventCallback = std::function<void()>;
 
+using TcpCallback = std::function<void()>;
+
 using SocketPtr = std::shared_ptr<Socket>;
 
 using Functor = std::function<void()>;
-
 
 };  // namespace archer
 

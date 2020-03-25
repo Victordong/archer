@@ -28,10 +28,10 @@ cc_library(
 cc_binary(
     name = "event_test",
     srcs = [
-        "tests/eventloop_test.cpp",
+        "tests/timer_test.cpp",
     ],
+    linkopts = ["-pthread"],
     deps = [
         ":net",
     ],
-    linkopts = ["-pthread"],
 )

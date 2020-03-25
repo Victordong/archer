@@ -20,6 +20,8 @@ class Channel : noncopyable {
 
     int fd() const { return (fd_.get())->fd(); };
     int events() const { return events_; };
+
+    int revents() const { return revents_; };
     void set_revents(int revents) { revents_ = revents; };
 
     void EnableReading() {

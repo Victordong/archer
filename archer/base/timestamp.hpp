@@ -7,7 +7,6 @@
 namespace archer {
 
 class Timestamp final {
-
    public:
     Timestamp() : micro_seconds_(0){};
 
@@ -18,7 +17,7 @@ class Timestamp final {
     ~Timestamp() = default;
 
     static const int kMicroSecondsPerSecond = 1000 * 1000;
-    
+
     static const int kNanoSecondsPerSecond = 1000 * 1000 * 1000;
 
     static const int kNanoSecondsPerMicroSecond = 1000;
@@ -36,7 +35,7 @@ class Timestamp final {
     };
 
     Timestamp& operator+(int delay) {
-        micro_seconds_ += micro_seconds_ + delay;
+        micro_seconds_ = micro_seconds_ + delay;
         return *this;
     }
 

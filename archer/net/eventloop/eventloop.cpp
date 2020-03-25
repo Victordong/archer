@@ -92,15 +92,15 @@ void Eventloop::DoPendingFunctors() {
     do_pending_ = false;
 }
 
-TimerId Eventloop::RunAt(const Timestamp& time, const TimerCallback& cb) {
+TimerId Eventloop::RunAt(const TimerCallback& cb, const Timestamp& time) {
     return timer_queue_->AddTimer(cb, time);
 }
 
-TimerId Eventloop::RunAfter(int delay, const TimerCallback& cb) {
+TimerId Eventloop::RunAfter(const TimerCallback& cb, int delay) {
     return timer_queue_->AddTimer(cb, Timestamp::Now() + delay);
 }
 
-TimerId Eventloop::RunEvery(double interval, const TimerCallback& cb) {
+TimerId Eventloop::RunEvery(const TimerCallback& cb, double interval) {
     return timer_queue_->AddTimer(cb, Timestamp::Now() + interval, interval);
 }
 

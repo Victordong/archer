@@ -47,9 +47,9 @@ class Eventloop final : noncopyable {
 
     void quit();
 
-    TimerId RunAt(const Timestamp& time, const TimerCallback& cb);
-    TimerId RunAfter(int delay, const TimerCallback& cb);
-    TimerId RunEvery(double interval, const TimerCallback& cb);
+    TimerId RunAt(const TimerCallback& cb, const Timestamp& time);
+    TimerId RunAfter(const TimerCallback& cb, int delay);
+    TimerId RunEvery(const TimerCallback& cb, double interval);
     void CancelTimer(TimerId& ti);
 
     void RunInLoop(const Functor& func);
