@@ -18,7 +18,7 @@ class Channel : noncopyable {
     void set_write_callback(const EventCallback& cb) { write_callback_ = cb; };
     void set_error_callback(const EventCallback& cb) { error_callback_ = cb; };
 
-    int fd() const { return (fd_.get())->fd(); };
+    int fd() const { return fd_.fd(); };
     int events() const { return events_; };
 
     int revents() const { return revents_; };
@@ -50,7 +50,7 @@ class Channel : noncopyable {
     void update();
 
     Eventloop* loop_;
-    const SocketPtr fd_;
+    const Socket fd_;
     int events_;
     int revents_;
     int index_;

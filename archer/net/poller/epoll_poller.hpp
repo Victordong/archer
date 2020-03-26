@@ -25,14 +25,14 @@ class EpollPoller : public PollerImp {
 
     void update(int, Channel&);
 
-    int epfd() { return epfd_.get()->fd(); };
+    int epfd() const { return epfd_.fd(); };
 
     void fillActiveChannels(int numEvents, ChannelList& activeChannels) const;
 
     using EventList = std::vector<epoll_event>;
 
     EventList events_;
-    SocketPtr epfd_;
+    Socket epfd_;
 };
 };  // namespace archer
 

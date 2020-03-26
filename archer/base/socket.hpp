@@ -5,9 +5,9 @@
 class Socket {
    public:
     Socket(int fd) : fd_(fd){};
-    ~Socket() { ::close(fd_);};
+    ~Socket() { ::close(fd_); };
 
-    int fd() { return fd_; };
+    int fd() const { return fd_; };
 
    private:
     int fd_;

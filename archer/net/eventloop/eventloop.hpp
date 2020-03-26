@@ -61,7 +61,7 @@ class Eventloop final : noncopyable {
     void HandleRead();
     void DoPendingFunctors();
 
-    int wakeup_fd() { return wakeup_fd_.get()->fd(); };
+    int wakeup_fd() const { return wakeup_fd_.fd(); };
 
     void wakeup();
 
@@ -74,7 +74,7 @@ class Eventloop final : noncopyable {
     std::shared_ptr<Poller> poller_;
     ChannelList active_channels_;
 
-    SocketPtr wakeup_fd_;
+    Socket wakeup_fd_;
     std::unique_ptr<Channel> wakeup_channel_;
 
     std::unique_ptr<TimerQueue> timer_queue_;
