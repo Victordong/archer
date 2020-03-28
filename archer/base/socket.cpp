@@ -46,11 +46,16 @@ void Socket::AddFlag(int flag) {
 }
 
 void Socket::Bind(struct sockaddr* addr) {
-    int result = ::bind(fd_, addr, sizeof addr);
+    int result = ::bind(fd_, addr, sizeof *addr);
     assert(result >= 0);
 }
 
 void Socket::Listen(int backlog_size) {
     int result = ::listen(fd_, backlog_size);
     assert(result >= 0);
+}
+
+int Socket::Accept(struct sockaddr* addr) {
+    socklen_t len = sizeof(*addr);
+    return ::accept(fd_, addr, &len);
 }

@@ -26,7 +26,9 @@ class Socket {
     void AddFlag(int flag);
 
     void Bind(struct sockaddr*);
-    void Listen(int backlog_size=20);
+    void Listen(int backlog_size = 20);
+
+    int Accept(struct sockaddr* addr);
 
    private:
     int fd_;

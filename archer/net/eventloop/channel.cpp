@@ -6,11 +6,15 @@ Channel::Channel(Eventloop* loop, int fd)
     : loop_(loop), fd_(fd), events_(0), revents_(0) {}
 
 Channel::~Channel() {
-    loop_->RemoveChannel(*this);
+    this->Remove();
 }
 
 void Channel::update() {
     loop_->UpdateChannel(*this);
+}
+
+void Channel::Remove() {
+    loop_->RemoveChannel(*this);
 }
 
 void Channel::HandleEvent() {

@@ -44,6 +44,8 @@ class Channel : noncopyable {
         update();
     }
 
+    void Remove();
+    
     Eventloop* eventloop() { return loop_; };
 
    private:
