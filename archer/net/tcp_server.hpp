@@ -18,9 +18,7 @@ class TcpServer : noncopyable {
 
     Ip4Addr addr() { return addr_; };
 
-    void OnConnCreate(const std::function<TcpConnPtr()>& cb) {
-        conn_createcb_ = cb;
-    };
+    void OnConnCreate(const std::function<TcpConnPtr()>& cb) { conncb_ = cb; };
     void OnRead(const TcpCallback& cb) { readcb_ = cb; };
     void OnState(const TcpCallback& cb) { statecb_ = cb; };
     void OnMsg(const TcpMsgCallBack& cb, CodecImp* codec) {
@@ -36,7 +34,7 @@ class TcpServer : noncopyable {
 
     TcpCallback readcb_, statecb_;
     TcpMsgCallBack msgcb_;
-    std::function<TcpConnPtr()> conn_createcb_;
+    std::function<TcpConnPtr()> conncb_;
 
     std::unique_ptr<CodecImp> codec_;
 
