@@ -41,10 +41,10 @@ class TimerQueue : noncopyable {
     void ResetTimerfd(int timestamp);
 
 
-    int timerfd() { return timerfd_.get()->fd(); };
+    int timerfd() { return timerfd_.fd(); };
 
     Eventloop* loop_;
-    SocketPtr timerfd_;
+    Socket timerfd_;
     Channel timerfd_channel_;
     TimerMap timers_;
 

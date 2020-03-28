@@ -11,4 +11,6 @@ class Buffer {
     char* buf;
     size_t size_, write_pos_, read_pos_;
 };
+
+class Slice {};
 #endif  // _ARCHER_BUFFER

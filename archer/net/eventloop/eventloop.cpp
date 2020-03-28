@@ -11,7 +11,7 @@ Eventloop::Eventloop()
       do_pending_(false),
       poller_(new Poller()),
       timer_queue_(new TimerQueue(this)),
-      wakeup_fd_(new Socket(eventfd(0, EFD_NONBLOCK | EFD_CLOEXEC))),
+      wakeup_fd_(eventfd(0, EFD_NONBLOCK | EFD_CLOEXEC)),
       wakeup_channel_(new Channel(this, wakeup_fd())) {
     assert(wakeup_fd() > 0);
     poller_->AddChannel(*wakeup_channel_);

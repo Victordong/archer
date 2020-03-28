@@ -11,10 +11,9 @@
 
 namespace archer {
 class Socket {
-
    public:
     explicit Socket(int fd) : fd_(fd){};
-    Socket(int domain, int type, int protocol=0);
+    Socket(int domain, int type, int protocol = 0);
     ~Socket() { ::close(fd_); };
 
     int fd() const { return fd_; };
@@ -24,10 +23,10 @@ class Socket {
     void SetReusePort(bool value = true);
     void SetNoDelay(bool value = true);
 
-    void AddFdFlag(int flag);
+    void AddFlag(int flag);
 
-    void Bind() {}
-
+    void Bind(struct sockaddr*);
+    void Listen(int backlog_size=20);
 
    private:
     int fd_;

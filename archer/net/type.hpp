@@ -5,14 +5,13 @@
 #include <memory>
 #include "archer/base/socket.hpp"
 #include "archer/base/timestamp.hpp"
+#include "archer/base/buffer.hpp"
 
 namespace archer {
 
 using TimerCallback = std::function<void()>;
 
 using EventCallback = std::function<void()>;
-
-using TcpCallback = std::function<void()>;
 
 using SocketPtr = std::shared_ptr<Socket>;
 

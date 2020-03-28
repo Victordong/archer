@@ -1,12 +1,27 @@
+#ifndef _ARCHER_TCP_CONN_HPP
+#define _ARCHER_TCP_CONN_HPP
+
 #include "archer/base/buffer.hpp"
+#include "archer/net/codec.hpp"
 #include "archer/net/eventloop/channel.hpp"
 #include "archer/net/eventloop/eventloop.hpp"
 #include "string.h"
+#include "archer/net/reactor.hpp"
 
 namespace archer {
+class TcpServer;
 class TcpConn;
 
+using TcpServerPtr = std::shared_ptr<TcpServer>;
 using TcpConnPtr = std::shared_ptr<TcpConn>;
+using AcceptorPtr = std::shared_ptr<Acceptor>;
+using SubReactorPtr = std::shared_ptr<SubReactor>;
+
+using SubReactorList = std::vector<std::shared_ptr<SubReactor>>;
+
+using TcpCallback = std::function<void(const TcpConnPtr&)>;
+using TcpMsgCallBack = std::function<void(const TcpConnPtr&, Slice)>;
+
 
 class TcpConn : noncopyable {
    public:
@@ -37,6 +52,8 @@ class TcpConn : noncopyable {
         return channel_ ? channel_->revents() & archer::kWriteEvent : false;
     };
     void set_reconnect_interval(int milli) { reconnect_interval_ = milli; };
+    Buffer& output() { return output_; };
+    Buffer& input() { return input_; };
 
     void Send(Buffer& msg);
     void SendOutPut() { Send(output_); };
@@ -44,10 +61,7 @@ class TcpConn : noncopyable {
     void Send(const std::string& msg) { Send(msg.data(), msg.size()); };
     void Send(const char* msg) { Send(msg, strlen(msg)); };
 
-    void OnRead(const TcpCallback& cb) {
-        assert(!readcb_);
-        readcb_ = cb;
-    };
+    void OnRead(const TcpCallback& cb, CodecImp* codec = nullptr);
     void OnWrite(const TcpCallback& cb) { writcb_ = cb; };
     void OnState(const TcpCallback& cb) { statecb_ = cb; };
 
@@ -78,3 +92,5 @@ class TcpConn : noncopyable {
     int64_t connected_time_;
 };
 };  // namespace archer
+
+#endif  // _ARCHER_TCP_CONN_HPP
