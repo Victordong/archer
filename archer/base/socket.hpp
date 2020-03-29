@@ -3,6 +3,7 @@
 
 #include <fcntl.h>
 #include <memory.h>
+#include <netdb.h>
 #include <netinet/in.h>
 #include <netinet/tcp.h>
 #include <sys/socket.h>
@@ -26,9 +27,11 @@ class Socket {
     void AddFlag(int flag);
 
     void Bind(struct sockaddr*);
+    void Bind(struct sockaddr_in* addr) { return Bind((sockaddr*)addr); };
     void Listen(int backlog_size = 20);
 
-    int Accept(struct sockaddr* addr);
+    int Accept(struct sockaddr*);
+    int Accept(struct sockaddr_in* addr) { return Accept((sockaddr*)addr); };
 
    private:
     int fd_;
@@ -51,6 +54,8 @@ class Ip4Addr {
     };
 
     static std::string HostToIp(std::string& host);
+
+    void GetHostName(const std::string& host);
 
    private:
     struct sockaddr_in addr_;
