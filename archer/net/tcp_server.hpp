@@ -39,6 +39,7 @@ class TcpServer : noncopyable {
     std::unique_ptr<CodecImp> codec_;
 
     int backlog_size_ = 20;
+    std::atomic_uint64_t total_connections_;
 };
 
 };  // namespace archer
