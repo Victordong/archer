@@ -9,7 +9,7 @@ namespace archer {
 
 class TcpServer : noncopyable {
    public:
-    TcpServer(int num);
+    TcpServer(int num, const std::string &host="", unsigned short port=8080):addr_(host, port){};
     ~TcpServer();
 
     static TcpServerPtr StartServer(const std::string& host,
@@ -26,9 +26,11 @@ class TcpServer : noncopyable {
         msgcb_ = cb;
     }
 
+    SubReactor* GetSubReactor();
+
    private:
-    Acceptor acceptor;
-    std::vector<SubReactor> reactors;
+    std::unique_ptr<Acceptor> acceptor;
+    std::vector<std::unique_ptr<SubReactor>> reactors;
 
     Ip4Addr addr_;
 
