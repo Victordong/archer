@@ -7,41 +7,41 @@ Socket::Socket(int domain, int type, int protocol) {
     assert(fd_ > 0);
 }
 
-void Socket::SetNonBlock(bool value) {
-    int flags = ::fcntl(fd_, F_GETFL, 0);
+void Socket::SetNonBlock(int fd, bool value) {
+    int flags = ::fcntl(fd, F_GETFL, 0);
     int result;
     if (value) {
-        result = ::fcntl(fd_, F_SETFL, flags | O_NONBLOCK);
+        result = ::fcntl(fd, F_SETFL, flags | O_NONBLOCK);
     } else {
-        result = ::fcntl(fd_, F_SETFL, flags & ~O_NONBLOCK);
+        result = ::fcntl(fd, F_SETFL, flags & ~O_NONBLOCK);
     }
     assert(result >= 0);
 }
 
-void Socket::SetReusePort(bool value) {
+void Socket::SetReusePort(int fd, bool value) {
     int flag = value;
     int len = sizeof flag;
-    int result = ::setsockopt(fd_, SOL_SOCKET, SO_REUSEPORT, &flag, len);
+    int result = ::setsockopt(fd, SOL_SOCKET, SO_REUSEPORT, &flag, len);
     assert(result >= 0);
 }
 
-void Socket::SetReuseAddr(bool value) {
+void Socket::SetReuseAddr(int fd, bool value) {
     int flag = value;
     int len = sizeof flag;
-    int result = ::setsockopt(fd_, SOL_SOCKET, SO_REUSEADDR, &flag, len);
+    int result = ::setsockopt(fd, SOL_SOCKET, SO_REUSEADDR, &flag, len);
     assert(result >= 0);
 }
 
-void Socket::SetNoDelay(bool value) {
+void Socket::SetNoDelay(int fd, bool value) {
     int flag = value;
     int len = sizeof flag;
-    int result = ::setsockopt(fd_, SOL_SOCKET, TCP_NODELAY, &flag, len);
+    int result = ::setsockopt(fd, SOL_SOCKET, TCP_NODELAY, &flag, len);
     assert(result >= 0);
 }
 
-void Socket::AddFlag(int flag) {
-    int ret = fcntl(fd_, F_GETFD);
-    int result = ::fcntl(fd_, F_SETFD, ret | flag);
+void Socket::AddFlag(int fd, int flag) {
+    int ret = fcntl(fd, F_GETFD);
+    int result = ::fcntl(fd, F_SETFD, ret | flag);
     assert(result >= 0);
 }
 
@@ -57,7 +57,10 @@ void Socket::Listen(int backlog_size) {
 
 int Socket::Accept(struct sockaddr* addr) {
     socklen_t len = sizeof(*addr);
-    return ::accept(fd_, addr, &len);
+    int conn_fd = ::accept(fd_, addr, &len);
+    SetNonBlock(conn_fd, true);
+    AddFlag(conn_fd, FD_CLOEXEC);
+    return conn_fd;
 }
 
 Ip4Addr::Ip4Addr(const std::string& host, unsigned short port) {
