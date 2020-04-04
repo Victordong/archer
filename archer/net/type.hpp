@@ -13,7 +13,7 @@ using TimerCallback = std::function<void()>;
 
 using EventCallback = std::function<void()>;
 
-using SocketPtr = std::shared_ptr<Socket>;
+using SocketPtr = std::unique_ptr<Socket>;
 
 using Functor = std::function<void()>;
 

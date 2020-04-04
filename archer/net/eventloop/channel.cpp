@@ -21,12 +21,18 @@ void Channel::HandleEvent() {
     if (revents_ & kNoneEvent) {
     }
     if (revents_ & kErrorEvent) {
-        error_callback_();
+        if (error_callback_) {
+            error_callback_();
+        }
     }
     if (revents_ & kReadEvent) {
-        read_callback_();
+        if (read_callback_) {
+            read_callback_();
+        }
     }
     if (revents_ & kWriteEvent) {
-        write_callback_();
+        if (write_callback_) {
+            write_callback_();
+        }
     }
 }

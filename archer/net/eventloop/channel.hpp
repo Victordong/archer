@@ -42,7 +42,11 @@ class Channel : noncopyable {
     void DisableAll() {
         events_ = kErrorEvent;
         update();
-    }
+    };
+
+    void Close(){
+
+    };
 
     void Remove();
     

@@ -28,7 +28,7 @@ class Acceptor {
 
     void HandleAccept();
 
-    void set_new_conncb_(const std::function<TcpConnPtr()>& cb) {
+    void set_new_conncb_(const std::function<void(int, Ip4Addr, Ip4Addr)>& cb) {
         conncb_ = cb;
     };
 
@@ -40,7 +40,7 @@ class Acceptor {
     std::unique_ptr<Eventloop> loop_;
     std::unique_ptr<Channel> listen_channel_;
 
-    std::function<TcpConnPtr()> conncb_;
+    std::function<void(int, Ip4Addr, Ip4Addr)> conncb_;
 
     Ip4Addr addr_;
 };
@@ -49,6 +49,9 @@ class SubReactor {
    public:
     SubReactor();
     ~SubReactor();
+
+
+    Eventloop* loop() { return loop_.get(); };
 
    private:
     std::unique_ptr<Eventloop> loop_;

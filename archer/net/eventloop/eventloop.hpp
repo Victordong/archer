@@ -9,6 +9,7 @@
 #include <iostream>
 #include <memory>
 #include <mutex>
+#include <map>
 #include <vector>
 #include "archer/base/noncopyable.hpp"
 #include "archer/net/type.hpp"

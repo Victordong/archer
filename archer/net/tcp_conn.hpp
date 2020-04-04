@@ -5,8 +5,8 @@
 #include "archer/net/codec.hpp"
 #include "archer/net/eventloop/channel.hpp"
 #include "archer/net/eventloop/eventloop.hpp"
-#include "string.h"
 #include "archer/net/reactor.hpp"
+#include "string.h"
 
 namespace archer {
 class TcpServer;
@@ -16,14 +16,14 @@ using TcpServerPtr = std::shared_ptr<TcpServer>;
 using TcpConnPtr = std::shared_ptr<TcpConn>;
 using AcceptorPtr = std::shared_ptr<Acceptor>;
 using SubReactorPtr = std::shared_ptr<SubReactor>;
+using CodecImpPtr = std::shared_ptr<CodecImp>;
 
 using SubReactorList = std::vector<std::shared_ptr<SubReactor>>;
 
 using TcpCallback = std::function<void(const TcpConnPtr&)>;
 using TcpMsgCallBack = std::function<void(const TcpConnPtr&, Slice)>;
 
-
-class TcpConn : noncopyable {
+class TcpConn : public std::enable_shared_from_this<TcpConn>, noncopyable {
    public:
     enum ConnState {
         Invalid,
@@ -43,7 +43,7 @@ class TcpConn : noncopyable {
 
     static TcpConnPtr CreateConnection(Eventloop* loop, int fd);
 
-    bool isClient();
+    bool isClient() { return dest_port_ > 0; };
 
     Eventloop* loop() { return loop_; };
     ConnState state() { return state_; };
@@ -61,20 +61,39 @@ class TcpConn : noncopyable {
     void Send(const std::string& msg) { Send(msg.data(), msg.size()); };
     void Send(const char* msg) { Send(msg, strlen(msg)); };
 
-    void OnRead(const TcpCallback& cb, CodecImp* codec = nullptr);
+    void OnRead(const TcpCallback& cb, CodecImpPtr codec = nullptr) {
+        readcb_ = cb;
+        if (codec) {
+            codec_ = codec;
+        }
+    };
     void OnWrite(const TcpCallback& cb) { writcb_ = cb; };
     void OnState(const TcpCallback& cb) { statecb_ = cb; };
 
     void Close();
-    void CloseNow();
+    void CloseNow() {
+        if (channel_) {
+            channel_->Close();
+        }
+    };
 
     void HandleRead(const TcpConnPtr& conn);
     void HandleWrite(const TcpConnPtr& conn);
+    void HandleClose(const TcpConnPtr& conn);
+    void HandleError(const TcpConnPtr& conn);
 
     void Cleanup(const TcpConnPtr& conn);
     void Connect(Eventloop*, const std::string&, unsigned short, int);
     void ReConnect();
-    void Attach(Eventloop* loop, int fd);
+    void Attach(Eventloop* loop, int fd, Ip4Addr local, Ip4Addr peer);
+
+    virtual int ReadImp(int fd, void* buf, size_t size) {
+        return ::read(fd, buf, size);
+    }
+    virtual int WriteImp(int fd, const void* buf, size_t size) {
+        return ::write(fd, buf, size);
+    }
+    virtual int HandleHandShake(const TcpConnPtr& conn);
 
    private:
     Eventloop* loop_;
@@ -88,6 +107,11 @@ class TcpConn : noncopyable {
     TimerId timerout_id_;
 
     std::string dest_host_, local_ip_;
+
+    Ip4Addr local_, peer_;
+
+    std::shared_ptr<CodecImp> codec_;
+
     int dest_port_, connection_timeout_, reconnect_interval_;
     int64_t connected_time_;
 };
