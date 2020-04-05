@@ -59,6 +59,8 @@ class Eventloop final : noncopyable {
 
     char* buffer() { return buffer_; };
 
+    std::atomic_int& total() { return total_; };
+
    private:
     using ChannelList = std::vector<Channel*>;
 
@@ -87,6 +89,8 @@ class Eventloop final : noncopyable {
     char buffer_[kBufferSize];
 
     std::mutex mutex_;
+
+    std::atomic_int total_;
 };
 };  // namespace archer
 

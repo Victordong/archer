@@ -15,13 +15,10 @@ class TcpConn;
 using TcpServerPtr = std::shared_ptr<TcpServer>;
 using TcpConnPtr = std::shared_ptr<TcpConn>;
 using AcceptorPtr = std::shared_ptr<Acceptor>;
-using SubReactorPtr = std::shared_ptr<SubReactor>;
 using CodecImpPtr = std::shared_ptr<CodecImp>;
 
-using SubReactorList = std::vector<std::shared_ptr<SubReactor>>;
-
 using TcpCallback = std::function<void(const TcpConnPtr&)>;
-using TcpMsgCallBack = std::function<void(const TcpConnPtr&, Slice)>;
+using TcpMsgCallBack = std::function<void(const TcpConnPtr&, std::string&msg)>;
 
 class TcpConn : public std::enable_shared_from_this<TcpConn>, noncopyable {
    public:

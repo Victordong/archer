@@ -32,7 +32,7 @@ class TcpServer : noncopyable {
     void HandleAccept(int fd, Ip4Addr local_addr, Ip4Addr peer_addr);
     void HandleClose(const TcpConnPtr& conn);
 
-    SubReactor* GetSubReactor();
+    Eventloop* GetSubReactor();
 
     void Start();
 
@@ -40,7 +40,7 @@ class TcpServer : noncopyable {
     int reactors_num_;
 
     std::unique_ptr<Acceptor> acceptor;
-    std::vector<std::unique_ptr<SubReactor>> reactors;
+    std::vector<std::unique_ptr<Eventloop>> reactors_;
 
     Ip4Addr addr_;
 

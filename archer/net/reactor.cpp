@@ -33,5 +33,3 @@ void Acceptor::HandleAccept() {
 
     }
 }
-
-SubReactor::SubReactor() : loop_(new Eventloop), total_nums_(0) {}

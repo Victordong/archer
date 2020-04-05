@@ -13,8 +13,7 @@ TcpServerPtr TcpServer::InitServer(int num,
             server->HandleAccept(fd, local_addr, peer_addr);
         });
     for (int i = 0; i < num; i++) {
-        server->reactors.push_back(
-            std::unique_ptr<SubReactor>(new SubReactor()));
+        server->reactors_.push_back(std::unique_ptr<Eventloop>(new Eventloop));
     }
     return server;
 }
@@ -22,10 +21,10 @@ TcpServerPtr TcpServer::InitServer(int num,
 void TcpServer::HandleAccept(int fd, Ip4Addr local_addr, Ip4Addr peer_addr) {
     TcpConnPtr conn = this->conncb_();
     conn_map_.insert(std::pair<int, TcpConnPtr>(fd, conn));
-    SubReactor* reactor = GetSubReactor();
+    Eventloop* reactor = GetSubReactor();
 
-    reactor->loop()->RunInLoop([=]() {
-        conn->attach(reactor->loop(), fd, local_addr, peer_addr);
+    reactor->RunInLoop([=]() {
+        conn->attach(reactor, fd, local_addr, peer_addr);
 
         if (readcb_) {
             conn->OnWrite(readcb_);
@@ -43,7 +42,9 @@ void TcpServer::HandleAccept(int fd, Ip4Addr local_addr, Ip4Addr peer_addr) {
             conn->OnMsg(codec_->clone(), msgcb_);
         }
 
-        
+        conn->OnClose([=](const TcpConnPtr& conn) { HandleClose(conn); });
+
+        reactor->total()++;
     });
 
     total_connections_++;
@@ -52,7 +53,9 @@ void TcpServer::HandleAccept(int fd, Ip4Addr local_addr, Ip4Addr peer_addr) {
 void TcpServer::HandleClose(const TcpConnPtr& conn) {
     acceptor->loop()->RunInLoop([=]() {
         conn_map_.erase(conn->channel()->fd());
-        closecb_(conn);
+        if(closecb_) {
+            closecb_(conn);
+        }
     });
 }
 

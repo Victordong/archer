@@ -44,21 +44,6 @@ class Acceptor {
 
     Ip4Addr addr_;
 };
-
-class SubReactor {
-   public:
-    SubReactor();
-    ~SubReactor();
-
-
-    Eventloop* loop() { return loop_.get(); };
-
-   private:
-    std::unique_ptr<Eventloop> loop_;
-
-    std::atomic_uint64_t total_nums_;
-};
-
 };  // namespace archer
 
 #endif  // _ARCHER_REACTOR_HPP

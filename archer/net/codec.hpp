@@ -3,15 +3,28 @@
 
 #include "archer/base/noncopyable.hpp"
 #include "archer/base/buffer.hpp"
+#include <string>
 
 namespace archer {
 class CodecImp {
    public:
-    CodecImp* clone();
-    int tryDecode(const Buffer&, Slice& msg);
+    virtual CodecImp* clone() = 0;
+    virtual int tryDecode(Buffer&, std::string&) = 0;
+    virtual void encode(Slice& msg, Buffer& buf) = 0;
+};
 
-   private:
-    /* data */
+class LineCodec: public CodecImp {
+   public:
+    CodecImp* clone() { return new LineCodec(); };
+    int tryDecode(Buffer&, std::string&);
+    void encode(Slice& msg, Buffer& buf);
+};
+
+class LengthCodec : public CodecImp {
+   public:
+    CodecImp* clone() { return new LengthCodec(); };
+    int tryDecode(Buffer&, std::string&);
+    void encode(Slice& msg, Buffer& buf);
 };
 
 }  // namespace archer

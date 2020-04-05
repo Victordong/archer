@@ -30,7 +30,7 @@ void TcpConn::OnMsg(CodecImp* codec, const TcpMsgCallBack& cb) {
     OnRead([=](const TcpConnPtr& conn) {
         int len;
         do {
-            Slice msg;
+            std::string msg;
             len = codec_->tryDecode(conn->input(), msg);
             if (len<0) {
                 conn->channel()->Close();
@@ -58,12 +58,17 @@ void TcpConn::HandleRead(const TcpConnPtr& conn) {
     }
 }
 
-void TcpConn::HandleWrite(const TcpConnPtr& conn) {}
+void TcpConn::HandleWrite(const TcpConnPtr& conn) {
+    if(state_==ConnState::Connected) {
+
+    }
+}
 
 void TcpConn::HandleClose(const TcpConnPtr& conn) {
     if (state_==ConnState::Connected) {
         state_ = ConnState::Closed;
         channel_->Remove();
+        loop_->total()--;
         closecb_(conn);
     }
 }
