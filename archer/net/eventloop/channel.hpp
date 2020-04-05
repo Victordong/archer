@@ -35,6 +35,11 @@ class Channel : noncopyable {
     };
 
     void DisableReading() {
+        events_ &= ~kReadEvent;
+        update();
+    };
+
+    void DisableWriting() {
         events_ &= ~kWriteEvent;
         update();
     };
@@ -44,12 +49,14 @@ class Channel : noncopyable {
         update();
     };
 
+    
+
     void Close(){
 
     };
 
     void Remove();
-    
+
     Eventloop* eventloop() { return loop_; };
 
    private:

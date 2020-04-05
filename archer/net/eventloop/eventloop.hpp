@@ -20,6 +20,7 @@ static const int kReadEvent = EPOLLIN | EPOLLPRI | EPOLLHUP;
 static const int kWriteEvent = EPOLLOUT;
 static const int kErrorEvent = EPOLLERR;
 static const int kNoneEvent = 0;
+static const int kBufferSize = 65536;
 
 class Poller;
 
@@ -56,6 +57,8 @@ class Eventloop final : noncopyable {
     void RunInLoop(const Functor& func);
     void QueueInLoop(const Functor& func);
 
+    char* buffer() { return buffer_; };
+
    private:
     using ChannelList = std::vector<Channel*>;
 
@@ -80,6 +83,8 @@ class Eventloop final : noncopyable {
 
     std::unique_ptr<TimerQueue> timer_queue_;
     std::vector<Functor> pending_functors_;
+
+    char buffer_[kBufferSize];
 
     std::mutex mutex_;
 };

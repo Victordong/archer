@@ -21,14 +21,16 @@ class TcpServer : noncopyable {
     Ip4Addr addr() { return addr_; };
 
     void OnConnCreate(const std::function<TcpConnPtr()>& cb) { conncb_ = cb; };
-    void OnState(const TcpCallback& cb) { statecb_ = cb; };
-    void OnRead(const TcpCallback& cb) { readcb_ = cb; };
-    void OnMsg(const TcpMsgCallBack& cb, CodecImp* codec) {
+    void OnConnState(const TcpCallback& cb) { statecb_ = cb; };
+    void OnConnRead(const TcpCallback& cb) { readcb_ = cb; }
+    void OnConnMsg(const TcpMsgCallBack& cb, CodecImp* codec) {
         codec_.reset(codec);
         msgcb_ = cb;
     }
+    void OnConnClose(const TcpCallback& cb) { closecb_ = cb; };
 
     void HandleAccept(int fd, Ip4Addr local_addr, Ip4Addr peer_addr);
+    void HandleClose(const TcpConnPtr& conn);
 
     SubReactor* GetSubReactor();
 
@@ -42,7 +44,7 @@ class TcpServer : noncopyable {
 
     Ip4Addr addr_;
 
-    TcpCallback readcb_, statecb_;
+    TcpCallback readcb_, statecb_, closecb_;
     TcpMsgCallBack msgcb_;
     std::function<TcpConnPtr()> conncb_;
 
