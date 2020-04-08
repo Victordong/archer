@@ -9,8 +9,13 @@ static int kInitSize = 1024;
 
 class Slice {
     public:
+     Slice(char*, size_t);
      char* data();
      size_t size();
+
+    private:
+     char* slice_b_;
+     size_t size_;
 };
 
 class Buffer {
@@ -21,17 +26,23 @@ class Buffer {
           write_pos_(0),
           read_pos_(0),
           empty_(true){};
+
+    Buffer(const Buffer& buf) { copyFrom(buf); };
+
+    Buffer(Buffer&& buf);
+
     ~Buffer() { buf_.clear(); };
 
     void clear() {
         write_pos_ = 0;
         read_pos_ = 0;
+        empty_ = true;
         buf_.clear();
     }
 
     size_t size() const {
         if(write_pos_-read_pos_!=0) {
-            return (write_pos_ - read_pos_ + cap_) & cap_;
+            return (write_pos_ - read_pos_ + cap_) % cap_;
         } else {
             if(empty_) {
                 return 0;
@@ -43,7 +54,9 @@ class Buffer {
 
     bool empty() { return empty_; };
 
-    char* data() { return buf_.data() + read_pos_; };
+    bool full() { return !empty_ && read_pos_ == write_pos_; };
+
+    char* data() { return buf_.data(); };
 
     char* begin() { return buf_.data() + read_pos_; };
 
@@ -51,12 +64,12 @@ class Buffer {
 
     size_t space() const { return cap_ - size(); }
 
-    char* makeRoom(size_t len);
+    Buffer& malloc(size_t len);
 
-    void makeRoom() {}
+    void malloc() {}
 
     Buffer& append(const char* p, size_t len);
-    
+
     Buffer& append(Slice slice) { return append(slice.data(), slice.size()); }
 
     Buffer& append(const char* p) { return append(p, sizeof(p)); };
@@ -71,27 +84,16 @@ class Buffer {
 
     Buffer& absorb(Buffer& buf);
 
+    Buffer& operator=(const Buffer& buf) { return *this; };
 
-    void readRaw(int* read, int* write);
+    Buffer& operator=(Buffer&& buf) { return *this; };
 
-    void ClearN(int n);
-
-    void IsFull();
-
-    void malloc(int cap);
-
-    void reset();
+    operator Slice() { return Slice(begin(), size()); };
 
    private:
     std::vector<char> buf_;
     size_t cap_, write_pos_, read_pos_;
     bool empty_;
-
-    void moveHead() {
-        std::copy(begin(), end(), buf_.data());
-        write_pos_ = size();
-        read_pos_ = 0;
-    }
 
     void expand(size_t len);
     void copyFrom(const Buffer& b);
