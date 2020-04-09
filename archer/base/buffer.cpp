@@ -1,7 +1,7 @@
 #include "archer/base/buffer.hpp"
 using namespace archer;
 
-Buffer& Buffer::append(const char* p, size_t len) {
+Buffer& Buffer::Append(const char* p, size_t len) {
     if (len > space()) {
         malloc(std::max(2 * cap_, len - space()));
     }
@@ -43,14 +43,14 @@ void Buffer::moveFrom(Buffer&& buf) {
     }
 }
 
-Buffer& Buffer::append(Buffer& buf) {
+Buffer& Buffer::Append(Buffer& buf) {
     if (this != &buf) {
-        append(buf.data(), buf.size());
+        Append(buf.data(), buf.size());
     }
     return *this;
 }
 
-inline Slice Slice::eatWord() {
+inline Slice Slice::EatWord() {
     auto b_iter = begin_;
     while (b_iter < end_ && ::isspace(*b_iter)) {
         b_iter++;
@@ -63,7 +63,7 @@ inline Slice Slice::eatWord() {
     return Slice(b_iter, e_iter);
 }
 
-inline Slice Slice::eatLine() {
+inline Slice Slice::EatLine() {
     auto slice_begin = begin_;
     while (begin_ < end_ && *begin_ != '\r' && *begin_ != '\n') {
         begin_++;
@@ -71,7 +71,7 @@ inline Slice Slice::eatLine() {
     return Slice(slice_begin, begin_);
 }
 
-inline Slice& Slice::trimSpace() {
+inline Slice& Slice::TrimSpace() {
     while (begin_ < end_ && ::isspace(*begin_)) {
         begin_++;
     }
@@ -119,7 +119,7 @@ inline bool operator!=(const Slice& a, const Slice& b) {
     return a.compare(b) != 0;
 }
 
-inline SliceList Slice::split(char c) const {
+inline SliceList Slice::Split(char c) const {
     SliceList list;
     auto slice_begin = begin_;
     for (auto iter = begin_; iter < end_; iter++) {

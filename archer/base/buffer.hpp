@@ -26,36 +26,36 @@ class Slice {
     const char* data() const { return begin_; };
     const char* end() const { return end_; };
     size_t size() const { return end_ - begin_; };
-    void resize(size_t len) { end_ = begin_ + len; };
+    void Resize(size_t len) { end_ = begin_ + len; };
     inline bool empty() const { return begin_ == end_; };
     inline char operator[](int i) { return *(begin_ + i); };
-    void clear() { begin_ = end_ = nullptr; };
+    void Clear() { begin_ = end_ = nullptr; };
 
-    Slice eatWord();
-    Slice eatLine();
-    Slice eat(size_t len) {
+    Slice EatWord();
+    Slice EatLine();
+    Slice Eat(size_t len) {
         auto old_begin = begin_;
         begin_ = begin_ + len;
         return Slice(old_begin, len);
     };
 
-    Slice sub(int boff, int eoff = 0) const {
+    Slice Sub(int boff, int eoff = 0) const {
         return Slice(begin_ + boff, end_ - eoff);
     };
 
-    Slice& trimSpace();
+    Slice& TrimSpace();
 
-    SliceList split(char c) const;
+    SliceList Split(char c) const;
 
-    std::string toString() const { return std::string(begin_, end_); };
+    std::string ToString() const { return std::string(begin_, end_); };
 
     int compare(const Slice&) const;
 
-    bool startWith(const Slice& slice) {
+    bool StartWith(const Slice& slice) {
         return (size() >= slice.size()) &&
                (::memcmp(data(), slice.data(), slice.size()) == 0);
     };
-    bool endWith(const Slice& slice) {
+    bool EndWith(const Slice& slice) {
         return (size() >= slice.size()) &&
                (::memcmp(end() - slice.size(), slice.data(), slice.size()) ==
                 0);
@@ -77,7 +77,7 @@ class Buffer {
 
     ~Buffer() { buf_.clear(); };
 
-    void clear() {
+    void Clear() {
         write_pos_ = 0;
         read_pos_ = 0;
         buf_.clear();
@@ -103,18 +103,18 @@ class Buffer {
 
     Buffer& malloc(size_t len);
 
-    Buffer& append(const char* p, size_t len);
+    Buffer& Append(const char* p, size_t len);
 
-    Buffer& append(Slice slice) { return append(slice.data(), slice.size()); }
+    Buffer& Append(Slice slice) { return Append(slice.data(), slice.size()); }
 
-    Buffer& append(const char* p) { return append(p, sizeof(p)); };
+    Buffer& Append(const char* p) { return Append(p, sizeof(p)); };
 
-    Buffer& append(Buffer& buf);
+    Buffer& Append(Buffer& buf);
 
-    Buffer& consume(size_t len) {
+    Buffer& Consume(size_t len) {
         read_pos_ += len;
         if (size() == 0) {
-            clear();
+            Clear();
         }
         return *this;
     };  // shiftN
