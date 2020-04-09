@@ -10,7 +10,6 @@
 #include <mutex>
 
 namespace archer {
-using Task = std::function<void()>;
 
 template <typename T>
 class SafeQueue : private std::mutex, private noncopyable {
@@ -18,6 +17,7 @@ class SafeQueue : private std::mutex, private noncopyable {
 
    public:
     SafeQueue() : exit_(false){};
+    ~SafeQueue(){};
 
     bool Push(T&& v);
     bool Push(const T& v);
@@ -104,6 +104,9 @@ template <typename T>
 T SafeQueue<T>::PopWait(int wait_ms) {
     std::unique_lock<std::mutex> lk(*this);
     waitReady(lk, wait_ms);
+    if (items_.empty()) {
+        return T();
+    }
     T temp = std::move(items_.front());
     items_.pop_front();
     return temp;
