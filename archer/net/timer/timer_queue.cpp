@@ -1,17 +1,19 @@
 #include "archer/net/timer/timer_queue.hpp"
+
 #include <string.h>
+
 #include "archer/net/timer/timer.hpp"
 
 using namespace archer;
 
 TimerQueue::TimerQueue(Eventloop* loop)
     : loop_(loop),
-      timerfd_(Socket(
-          timerfd_create(CLOCK_MONOTONIC, TFD_NONBLOCK | TFD_CLOEXEC))),
+      timerfd_(
+          Socket(timerfd_create(CLOCK_MONOTONIC, TFD_NONBLOCK | TFD_CLOEXEC))),
       timerfd_channel_(loop, timerfd()) {
     assert(timerfd() > 0);
     loop_->AddChannel(timerfd_channel_);
-    timerfd_channel_.set_read_callback([=]() { this->HandleRead(); });
+    timerfd_channel_.set_read_callback([=]() { this->handleRead(); });
     timerfd_channel_.EnableReading();
 }
 
@@ -22,9 +24,7 @@ TimerId TimerQueue::AddTimer(const TimerCallback& cb,
                              int interval) {
     TimerPtr timer_ptr(new Timer(cb, ts, interval));
 
-    loop_->RunInLoop([=]() {
-        this->AddTimerInLoop(timer_ptr);
-    });
+    loop_->RunInLoop([=]() { this->AddTimerInLoop(timer_ptr); });
 
     return std::shared_ptr<Timer>(timer_ptr);
 }
@@ -85,7 +85,7 @@ void TimerQueue::CancelTimerInLoop(const TimerId& ti) {
     }
 }
 
-void TimerQueue::HandleRead() {
+void TimerQueue::handleRead() {
     uint64_t buf;
     int num = ::read(timerfd_.fd(), &buf, sizeof(uint64_t));
 

@@ -4,6 +4,7 @@
 #include <map>
 #include <memory>
 #include <mutex>
+
 #include "archer/net/eventloop/channel.hpp"
 
 namespace archer {
@@ -12,7 +13,7 @@ class PollerImp : noncopyable {
    public:
     using ChannelList = std::vector<Channel*>;
 
-    PollerImp() {};
+    PollerImp(){};
 
     virtual void AddChannel(Channel&) = 0;
 

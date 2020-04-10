@@ -1,5 +1,7 @@
 #include "archer/net/eventloop/eventloop.hpp"
+
 #include <sys/eventfd.h>
+
 #include "archer/net/poller/epoll_poller.hpp"
 #include "archer/net/timer/timer_queue.hpp"
 
@@ -44,7 +46,7 @@ void Eventloop::quit() {
     wakeup();
 }
 
-void Eventloop::HandleRead() {}
+void Eventloop::handleRead() {}
 
 void Eventloop::wakeup() {
     uint64_t buf = 1;

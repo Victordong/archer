@@ -1,9 +1,10 @@
 #ifndef _ARCHER_THREAD_HPP
 #define _ARCHER_THREAD_HPP
 
-#include <archer/base/safe_queue.hpp>
-#include <vector>
 #include <thread>
+#include <vector>
+
+#include "archer/base/safe_queue.hpp"
 
 namespace archer {
 using Task = std::function<void()>;
@@ -14,7 +15,7 @@ class ThreadPool {
     ~ThreadPool();
 
     void Start();
-    ThreadPool& Exit() { 
+    ThreadPool& Exit() {
         tasks_.Exit();
         return *this;
     }

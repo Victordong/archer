@@ -5,12 +5,14 @@
 #include <sys/epoll.h>
 #include <sys/timerfd.h>
 #include <unistd.h>
+
 #include <atomic>
 #include <iostream>
+#include <map>
 #include <memory>
 #include <mutex>
-#include <map>
 #include <vector>
+
 #include "archer/base/noncopyable.hpp"
 #include "archer/net/type.hpp"
 
@@ -64,7 +66,7 @@ class Eventloop final : noncopyable {
    private:
     using ChannelList = std::vector<Channel*>;
 
-    void HandleRead();
+    void handleRead();
     void DoPendingFunctors();
 
     int wakeup_fd() const { return wakeup_fd_.fd(); };

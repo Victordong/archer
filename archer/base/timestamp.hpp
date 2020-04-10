@@ -2,6 +2,7 @@
 #define _ARCHER_TIMESTAMP_HPP
 #include <sys/time.h>
 #include <time.h>
+
 #include <vector>
 
 namespace archer {

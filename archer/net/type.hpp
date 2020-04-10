@@ -3,9 +3,10 @@
 
 #include <functional>
 #include <memory>
+
+#include "archer/base/buffer.hpp"
 #include "archer/base/socket.hpp"
 #include "archer/base/timestamp.hpp"
-#include "archer/base/buffer.hpp"
 
 namespace archer {
 

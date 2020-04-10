@@ -3,8 +3,10 @@
 
 #include <sys/time.h>
 #include <unistd.h>
+
 #include <functional>
 #include <map>
+
 #include "archer/net/eventloop/channel.hpp"
 
 namespace archer {
@@ -33,13 +35,12 @@ class TimerQueue : noncopyable {
     void CancelTimerInLoop(const TimerId& ti);
 
    private:
-    void HandleRead();
+    void handleRead();
     void GetExpired(Timestamp now);
     void Reset(const std::vector<Entry>& expired, Timestamp now);
 
     bool Insert(const TimerPtr& timer);
     void ResetTimerfd(int timestamp);
-
 
     int timerfd() { return timerfd_.fd(); };
 

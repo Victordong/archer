@@ -3,6 +3,7 @@
 
 #include <functional>
 #include <vector>
+
 #include "archer/net/eventloop/eventloop.hpp"
 
 namespace archer {
@@ -48,8 +49,6 @@ class Channel : noncopyable {
         events_ = kErrorEvent;
         update();
     };
-
-    
 
     void Close(){
 

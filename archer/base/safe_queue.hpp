@@ -1,13 +1,14 @@
 #ifndef _ARCHER_SAFEQUEUE_HPP
 #define _ARCHER_SAFEQUEUE_HPP
 
-#include <archer/base/noncopyable.hpp>
 #include <atomic>
 #include <condition_variable>
 #include <functional>
 #include <limits>
 #include <list>
 #include <mutex>
+
+#include "archer/base/noncopyable.hpp"
 
 namespace archer {
 

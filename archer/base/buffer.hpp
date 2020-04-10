@@ -109,6 +109,8 @@ class Buffer {
 
     Buffer& Append(const char* p) { return Append(p, sizeof(p)); };
 
+    Buffer& Append(const std::string& s) { return Append(s.data(), s.size()); };
+
     Buffer& Append(Buffer& buf);
 
     Buffer& Consume(size_t len) {

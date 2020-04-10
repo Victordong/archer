@@ -1,12 +1,13 @@
 #ifndef _ARCHER_TCP_CONN_HPP
 #define _ARCHER_TCP_CONN_HPP
 
+#include <string.h>
+
 #include "archer/base/buffer.hpp"
+#include "archer/net/acceptor.hpp"
 #include "archer/net/codec.hpp"
 #include "archer/net/eventloop/channel.hpp"
 #include "archer/net/eventloop/eventloop.hpp"
-#include "archer/net/reactor.hpp"
-#include "string.h"
 
 namespace archer {
 class TcpServer;
@@ -18,7 +19,9 @@ using AcceptorPtr = std::shared_ptr<Acceptor>;
 using CodecImpPtr = std::shared_ptr<CodecImp>;
 
 using TcpCallback = std::function<void(const TcpConnPtr&)>;
-using TcpMsgCallBack = std::function<void(const TcpConnPtr&, std::string&msg)>;
+using TcpMsgCallBack = std::function<void(const TcpConnPtr&, const Slice&)>;
+using RetMsgCallBack =
+    std::function<std::string(const TcpConnPtr&, const std::string& msg)>;
 
 class TcpConn : public std::enable_shared_from_this<TcpConn>, noncopyable {
    public:
@@ -70,7 +73,7 @@ class TcpConn : public std::enable_shared_from_this<TcpConn>, noncopyable {
     void Send(const std::string& msg) { Send(msg.data(), msg.size()); };
     void Send(const char* msg) { Send(msg, strlen(msg)); };
 
-    void OnRead(const TcpCallback& cb) {readcb_ = cb;};
+    void OnRead(const TcpCallback& cb) { readcb_ = cb; };
     void OnWrite(const TcpCallback& cb) { writcb_ = cb; };
     void OnState(const TcpCallback& cb) { statecb_ = cb; };
     void OnMsg(CodecImp* codec, const TcpMsgCallBack& cb);
@@ -83,11 +86,11 @@ class TcpConn : public std::enable_shared_from_this<TcpConn>, noncopyable {
         }
     };
 
-    void HandleRead(const TcpConnPtr& conn);
-    void HandleWrite(const TcpConnPtr& conn);
-    void HandleClose(const TcpConnPtr& conn);
-    void HandleError(const TcpConnPtr& conn);
-    void HandleHandShake(const TcpConnPtr& conn);
+    void handleRead(const TcpConnPtr& conn);
+    void handleWrite(const TcpConnPtr& conn);
+    void handleClose(const TcpConnPtr& conn);
+    void handleError(const TcpConnPtr& conn);
+    void handleHandShake(const TcpConnPtr& conn);
 
     void Cleanup(const TcpConnPtr& conn);
     void Connect(Eventloop* loop,

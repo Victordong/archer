@@ -15,12 +15,12 @@ void TcpConn::attach(Eventloop* loop, int fd, Ip4Addr local, Ip4Addr peer) {
 
     channel_.reset(new Channel(loop, fd));
     loop_->AddChannel(*channel_);
-    channel_->set_read_callback([=]() { conn->HandleRead(conn); });
-    channel_->set_write_callback([=]() { conn->HandleWrite(conn); });
-    channel_->set_error_callback([=]() { conn->HandleError(conn); });
+    channel_->set_read_callback([=]() { conn->handleRead(conn); });
+    channel_->set_write_callback([=]() { conn->handleWrite(conn); });
+    channel_->set_error_callback([=]() { conn->handleError(conn); });
     channel_->EnableReading();
 
-    HandleHandShake(conn);
+    handleHandShake(conn);
 
     Socket::SetKeepAlive(channel_->fd());
 }
@@ -30,42 +30,41 @@ void TcpConn::OnMsg(CodecImp* codec, const TcpMsgCallBack& cb) {
     OnRead([=](const TcpConnPtr& conn) {
         int len;
         do {
-            std::string msg;
-            len = codec_->tryDecode(conn->input(), msg);
-            if (len<0) {
+            Slice msg;
+            len = codec_->TryDecode(conn->input(), msg);
+            if (len < 0) {
                 conn->channel()->Close();
-            } else if (len >0) {
+            } else if (len > 0) {
                 cb(conn, msg);
             }
         } while (len);
     });
 }
 
-void TcpConn::HandleRead(const TcpConnPtr& conn) {
+void TcpConn::handleRead(const TcpConnPtr& conn) {
     if (state_ == ConnState::Connected) {
         int result = ReadImp(channel_->fd(), loop_->buffer(), kBufferSize);
-        if (result <0) {
+        if (result < 0) {
             if (errno == EAGAIN || errno == EINTR || errno == EWOULDBLOCK) {
                 return;
             } else {
-                HandleError(conn);
+                handleError(conn);
             }
-        } else if (result ==0) {
-            HandleClose(conn);
+        } else if (result == 0) {
+            handleClose(conn);
         } else {
             readcb_(conn);
         }
     }
 }
 
-void TcpConn::HandleWrite(const TcpConnPtr& conn) {
-    if(state_==ConnState::Connected) {
-
+void TcpConn::handleWrite(const TcpConnPtr& conn) {
+    if (state_ == ConnState::Connected) {
     }
 }
 
-void TcpConn::HandleClose(const TcpConnPtr& conn) {
-    if (state_==ConnState::Connected) {
+void TcpConn::handleClose(const TcpConnPtr& conn) {
+    if (state_ == ConnState::Connected) {
         state_ = ConnState::Closed;
         channel_->Remove();
         loop_->total()--;
@@ -73,16 +72,15 @@ void TcpConn::HandleClose(const TcpConnPtr& conn) {
     }
 }
 
-void TcpConn::HandleError(const TcpConnPtr& conn) {
-    if (state_!=Error) {
+void TcpConn::handleError(const TcpConnPtr& conn) {
+    if (state_ != Error) {
         state_ = ConnState::Error;
         channel_->Remove();
         closecb_(conn);
     }
 }
-    
 
-void TcpConn::HandleHandShake(const TcpConnPtr& conn) {
+void TcpConn::handleHandShake(const TcpConnPtr& conn) {
     state_ = ConnState::Connected;
     statecb_(conn);
 }
