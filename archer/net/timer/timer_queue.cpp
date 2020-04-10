@@ -6,7 +6,7 @@ using namespace archer;
 
 TimerQueue::TimerQueue(Eventloop* loop)
     : loop_(loop),
-      timerfd_(new Socket(
+      timerfd_(Socket(
           timerfd_create(CLOCK_MONOTONIC, TFD_NONBLOCK | TFD_CLOEXEC))),
       timerfd_channel_(loop, timerfd()) {
     assert(timerfd() > 0);
@@ -87,7 +87,7 @@ void TimerQueue::CancelTimerInLoop(const TimerId& ti) {
 
 void TimerQueue::HandleRead() {
     uint64_t buf;
-    int num = ::read(timerfd_->fd(), &buf, sizeof(uint64_t));
+    int num = ::read(timerfd_.fd(), &buf, sizeof(uint64_t));
 
     GetExpired(Timestamp::Now());
     for (auto timer : expire_timers_) {

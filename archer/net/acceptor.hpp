@@ -1,8 +1,7 @@
-#ifndef _ARCHER_REACTOR_HPP
-#define _ARCHER_REACTOR_HPP
+#ifndef _ARCHER_ACCEPTOR_HPP
+#define _ARCHER_ACCEPTOR_HPP
 
 #include "archer/net/eventloop/eventloop.hpp"
-#include "archer/net/tcp_conn.hpp"
 
 namespace archer {
 class TcpServer;
@@ -26,7 +25,7 @@ class Acceptor {
 
     void Listen() { listenfd_.Listen(); };
 
-    void HandleAccept();
+    void handleAccept();
 
     void set_new_conncb_(const std::function<void(int, Ip4Addr, Ip4Addr)>& cb) {
         conncb_ = cb;
@@ -46,4 +45,4 @@ class Acceptor {
 };
 };  // namespace archer
 
-#endif  // _ARCHER_REACTOR_HPP
+#endif  // _ARCHER_ACCEPTOR_HPP

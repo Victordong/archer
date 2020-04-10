@@ -60,7 +60,7 @@ class Slice {
                (::memcmp(end() - slice.size(), slice.data(), slice.size()) ==
                 0);
     };
-    operator std::string() { return std::string(begin_, end_); };
+    operator std::string() const { return std::string(begin_, end_); };
 
    private:
     const char* begin_;

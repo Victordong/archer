@@ -6,7 +6,6 @@
 namespace archer {
 
 class Timer : noncopyable {
-    friend class TimerQueue;
 
    public:
     enum TimerStatus {
@@ -35,10 +34,10 @@ class Timer : noncopyable {
 
     bool repeat() { return repeat_; };
 
+    void set_status(TimerStatus status) { status_ = status; };
+
    private:
     static unsigned int total_num_;
-
-    void set_status(TimerStatus status) { status_ = status; };
 
     Timestamp when_;
     TimerCallback timer_callback_;
