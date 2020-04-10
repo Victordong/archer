@@ -13,7 +13,7 @@ class Channel : noncopyable {
     Channel(Eventloop* loop, int fd);
     ~Channel();
 
-    void HandleEvent();
+    void handleEvent();
 
     void set_read_callback(const EventCallback& cb) { read_callback_ = cb; };
     void set_write_callback(const EventCallback& cb) { write_callback_ = cb; };

@@ -33,10 +33,10 @@ void Eventloop::Loop() {
     while (!quit_) {
         poller_->Poll(kPollTimeMs, active_channels_);
         for (auto channel : active_channels_) {
-            channel->HandleEvent();
+            channel->handleEvent();
         }
         active_channels_.clear();
-        DoPendingFunctors();
+        doPendingFunctors();
     }
 }
 
@@ -78,7 +78,7 @@ void Eventloop::QueueInLoop(const Functor& func) {
     wakeup();
 }
 
-void Eventloop::DoPendingFunctors() {
+void Eventloop::doPendingFunctors() {
     std::vector<Functor> functors;
     do_pending_ = true;
 

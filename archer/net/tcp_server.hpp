@@ -23,14 +23,14 @@ class TcpServer : noncopyable {
 
     Ip4Addr addr() { return addr_; };
 
-    void OnConnCreate(const std::function<TcpConnPtr()>& cb) { conncb_ = cb; };
-    void OnConnState(const TcpCallback& cb) { statecb_ = cb; };
-    void OnConnRead(const TcpCallback& cb) { readcb_ = cb; }
-    void OnConnMsg(const TcpMsgCallBack& cb, CodecImp* codec) {
+    virtual void OnConnCreate(const TcpCreateCallback& cb) { conncb_ = cb; };
+    virtual void OnConnState(const TcpCallback& cb) { statecb_ = cb; };
+    virtual void OnConnRead(const TcpCallback& cb) { readcb_ = cb; }
+    virtual void OnConnMsg(const TcpMsgCallBack& cb, CodecImp* codec) {
         codec_.reset(codec);
         msgcb_ = cb;
     }
-    void OnConnClose(const TcpCallback& cb) { closecb_ = cb; };
+    virtual void OnConnClose(const TcpCallback& cb) { closecb_ = cb; };
 
     virtual void handleAccept(int fd, Ip4Addr local_addr, Ip4Addr peer_addr);
     virtual void handleClose(const TcpConnPtr& conn);
@@ -81,7 +81,9 @@ class HSHA : public TcpServer {
         thread_pool_.Exit();
         thread_pool_.Join();
     };
+
     void OnConnMsg(const RetMsgCallBack& cb, CodecImp* codec);
+
     void Start();
 
    private:

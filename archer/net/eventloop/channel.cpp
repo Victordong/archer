@@ -17,7 +17,7 @@ void Channel::Remove() {
     loop_->RemoveChannel(*this);
 }
 
-void Channel::HandleEvent() {
+void Channel::handleEvent() {
     if (revents_ & kNoneEvent) {
     }
     if (revents_ & kErrorEvent) {

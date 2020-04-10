@@ -31,11 +31,12 @@ void TcpConn::OnMsg(CodecImp* codec, const TcpMsgCallBack& cb) {
         int len;
         do {
             Slice msg;
-            len = codec_->TryDecode(conn->input(), msg);
+            len = codec_->TryDecode(conn->input_, msg);
             if (len < 0) {
                 conn->channel()->Close();
             } else if (len > 0) {
                 cb(conn, msg);
+                conn->input_.Consume(len);
             }
         } while (len);
     });
@@ -43,7 +44,8 @@ void TcpConn::OnMsg(CodecImp* codec, const TcpMsgCallBack& cb) {
 
 void TcpConn::handleRead(const TcpConnPtr& conn) {
     if (state_ == ConnState::Connected) {
-        int result = ReadImp(channel_->fd(), loop_->buffer(), kBufferSize);
+        input_.malloc(kMallocSize);
+        int result = readImp(channel_->fd(), input_.end(), input_.space());
         if (result < 0) {
             if (errno == EAGAIN || errno == EINTR || errno == EWOULDBLOCK) {
                 return;
@@ -60,6 +62,20 @@ void TcpConn::handleRead(const TcpConnPtr& conn) {
 
 void TcpConn::handleWrite(const TcpConnPtr& conn) {
     if (state_ == ConnState::Connected) {
+        int result = writeImp(channel_->fd(), output_.begin(), output_.size());
+        if (result > 0) {
+            output_.Consume(result);
+        } else if (result < 0) {
+            if (errno == EAGAIN || errno == EWOULDBLOCK || errno == EINTR) {
+            } else {
+                conn->channel_->DisableWriting();
+                handleError(conn);
+            }
+        } else {
+        }
+        if (output_.empty()) {
+            channel_->DisableWriting();
+        }
     }
 }
 
@@ -84,3 +100,19 @@ void TcpConn::handleHandShake(const TcpConnPtr& conn) {
     state_ = ConnState::Connected;
     statecb_(conn);
 }
+
+void TcpConn::Send(const char* msg, size_t len) {}
+
+void TcpConn::SendMsg(Slice& s) {}
+
+void TcpConn::Connect(Eventloop* loop,
+                      const std::string& host,
+                      unsigned short port,
+                      int timeout,
+                      const std::string& local_ip) {}
+
+void TcpConn::ReConnect() {}
+
+void TcpConn::Close() {}
+
+void TcpConn::Cleanup(const TcpConnPtr& conn) {}

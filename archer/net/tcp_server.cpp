@@ -112,8 +112,8 @@ void HSHA::OnConnMsg(const RetMsgCallBack& cb, CodecImp* codec) {
         [&](const TcpConnPtr& conn, const Slice& slice) {
             std::string msg = slice;
             thread_pool_.AddTask([&]() { 
-                std::string result =  cb(conn, msg);
-                conn->loop()->RunInLoop([=]() { conn->Send(result); });
+                auto result =  cb(conn, msg);
+                conn->loop()->RunInLoop([=]() { conn->SendMsg(result); });
             });
         },
         codec);

@@ -18,10 +18,13 @@ using TcpConnPtr = std::shared_ptr<TcpConn>;
 using AcceptorPtr = std::shared_ptr<Acceptor>;
 using CodecImpPtr = std::shared_ptr<CodecImp>;
 
+using TcpCreateCallback = std::function<TcpConnPtr()>;
 using TcpCallback = std::function<void(const TcpConnPtr&)>;
 using TcpMsgCallBack = std::function<void(const TcpConnPtr&, const Slice&)>;
 using RetMsgCallBack =
     std::function<std::string(const TcpConnPtr&, const std::string& msg)>;
+
+static size_t kMallocSize = 1024;
 
 class TcpConn : public std::enable_shared_from_this<TcpConn>, noncopyable {
    public:
@@ -67,11 +70,15 @@ class TcpConn : public std::enable_shared_from_this<TcpConn>, noncopyable {
     Buffer& output() { return output_; };
     Buffer& input() { return input_; };
 
-    void Send(Buffer& msg);
-    void SendOutPut() { Send(output_); };
     void Send(const char* msg, size_t len);
+    void Send(Buffer& msg) { Send(msg.data(), msg.size()); };
     void Send(const std::string& msg) { Send(msg.data(), msg.size()); };
     void Send(const char* msg) { Send(msg, strlen(msg)); };
+
+    void SendOutPut() { Send(output_); };
+
+    void SendMsg(Slice &s);
+    void SendMsg(const std::string& s) { SendMsg(Slice(s)); };
 
     void OnRead(const TcpCallback& cb) { readcb_ = cb; };
     void OnWrite(const TcpCallback& cb) { writcb_ = cb; };
@@ -93,18 +100,20 @@ class TcpConn : public std::enable_shared_from_this<TcpConn>, noncopyable {
     void handleHandShake(const TcpConnPtr& conn);
 
     void Cleanup(const TcpConnPtr& conn);
+
     void Connect(Eventloop* loop,
                  const std::string& host,
                  unsigned short port,
                  int timeout,
                  const std::string& local_ip);
     void ReConnect();
+
     void attach(Eventloop* loop, int fd, Ip4Addr local, Ip4Addr peer);
 
-    virtual int ReadImp(int fd, void* buf, size_t size) {
+    virtual int readImp(int fd, void* buf, size_t size) {
         return ::read(fd, buf, size);
     }
-    virtual int WriteImp(int fd, const void* buf, size_t size) {
+    virtual int writeImp(int fd, const void* buf, size_t size) {
         return ::write(fd, buf, size);
     }
 

@@ -14,7 +14,7 @@ Buffer& Buffer::malloc(size_t len) {
     if (space() + pre_space() > len) {
         std::copy(begin(), end(), data());
     } else {
-        auto new_size = cap_ + len;
+        auto new_size = size() + len;
         auto new_buf = std::vector<char>(new_size);
         std::copy(begin(), end(), new_buf.data());
         buf_ = std::move(new_buf);

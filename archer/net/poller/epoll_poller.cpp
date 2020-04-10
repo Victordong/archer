@@ -32,8 +32,7 @@ void EpollPoller::fillActiveChannels(int num_events,
     Channel* cur_channel;
 
     for (EventList::const_iterator ev_iter = events_.begin();
-         ev_iter != events_.end() && num_events > 0; ++ev_iter) {
-        --num_events;
+         ev_iter != events_.end() && num_events > 0; ev_iter++, num_events--) {
         channel_iter = channels_.find(ev_iter->data.fd);
         cur_channel = channel_iter->second;
         cur_channel->set_revents(ev_iter->events);

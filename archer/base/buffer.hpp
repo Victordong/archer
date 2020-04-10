@@ -17,7 +17,7 @@ class Slice {
    public:
     Slice() : begin_(nullptr), end_(nullptr){};
     Slice(const char* begin, const char* end) : begin_(begin), end_(end){};
-    Slice(std::string& s) : begin_(s.data()), end_(s.data() + s.size()){};
+    Slice(const std::string& s) : begin_(s.data()), end_(s.data() + s.size()){};
     Slice(const char* begin, size_t len) : begin_(begin), end_(begin + len){};
     Slice(const char* begin) : begin_(begin), end_(begin + strlen(begin)){};
     ~Slice(){};
@@ -101,7 +101,7 @@ class Buffer {
 
     size_t pre_space() const { return read_pos_; };
 
-    Buffer& malloc(size_t len);
+    Buffer& malloc(size_t len = 0);
 
     Buffer& Append(const char* p, size_t len);
 
