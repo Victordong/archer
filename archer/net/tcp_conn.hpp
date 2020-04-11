@@ -71,7 +71,7 @@ class TcpConn : public std::enable_shared_from_this<TcpConn>, noncopyable {
     Buffer& input() { return input_; };
 
     void Send(const char* msg, size_t len);
-    void Send(Buffer& msg) { Send(msg.data(), msg.size()); };
+    void Send(Buffer& msg);
     void Send(const std::string& msg) { Send(msg.data(), msg.size()); };
     void Send(const char* msg) { Send(msg, strlen(msg)); };
 

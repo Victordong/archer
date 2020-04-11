@@ -25,6 +25,10 @@ class Channel : noncopyable {
     int revents() const { return revents_; };
     void set_revents(int revents) { revents_ = revents; };
 
+    bool ReadEnabled() { return events_ & kReadEvent; };
+
+    bool WriteEnabled() { return events_ & kWriteEvent; };
+
     void EnableReading() {
         events_ |= kReadEvent;
         update();

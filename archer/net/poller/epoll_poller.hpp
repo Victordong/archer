@@ -1,7 +1,6 @@
 #ifndef _ARCHER_EPOLL_POLLER_HPP
 #define _ARCHER_EPOLL_POLLER_HPP
 
-#pragma once
 #include <vector>
 
 #include "archer/net/poller/poller.hpp"

@@ -25,6 +25,14 @@ Buffer& Buffer::malloc(size_t len) {
     return *this;
 }
 
+Buffer& Buffer::Append(Buffer& buf) {
+    if (this != &buf) {
+        Append(buf.data(), buf.size());
+        buf.Clear();
+    }
+    return *this;
+}
+
 void Buffer::copyFrom(const Buffer& buf) {
     if (this != &buf) {
         buf_ = buf.buf_;
@@ -43,12 +51,7 @@ void Buffer::moveFrom(Buffer&& buf) {
     }
 }
 
-Buffer& Buffer::Append(Buffer& buf) {
-    if (this != &buf) {
-        Append(buf.data(), buf.size());
-    }
-    return *this;
-}
+
 
 inline Slice Slice::EatWord() {
     auto b_iter = begin_;

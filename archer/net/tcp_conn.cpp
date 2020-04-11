@@ -33,7 +33,7 @@ void TcpConn::OnMsg(CodecImp* codec, const TcpMsgCallBack& cb) {
             Slice msg;
             len = codec_->TryDecode(conn->input_, msg);
             if (len < 0) {
-                conn->channel()->Close();
+                handleClose(conn);
             } else if (len > 0) {
                 cb(conn, msg);
                 conn->input_.Consume(len);
@@ -68,12 +68,14 @@ void TcpConn::handleWrite(const TcpConnPtr& conn) {
         } else if (result < 0) {
             if (errno == EAGAIN || errno == EWOULDBLOCK || errno == EINTR) {
             } else {
-                conn->channel_->DisableWriting();
-                handleError(conn);
+                if (channel_->WriteEnabled()) {
+                    channel_->DisableWriting();
+                    handleError(conn);
+                }
             }
         } else {
         }
-        if (output_.empty()) {
+        if (output_.empty() && channel_->WriteEnabled()) {
             channel_->DisableWriting();
         }
     }
@@ -84,6 +86,7 @@ void TcpConn::handleClose(const TcpConnPtr& conn) {
         state_ = ConnState::Closed;
         channel_->Remove();
         loop_->total()--;
+        statecb_(conn);
         closecb_(conn);
     }
 }
@@ -92,6 +95,8 @@ void TcpConn::handleError(const TcpConnPtr& conn) {
     if (state_ != Error) {
         state_ = ConnState::Error;
         channel_->Remove();
+        loop_->total()--;
+        statecb_(conn);
         closecb_(conn);
     }
 }
@@ -101,9 +106,32 @@ void TcpConn::handleHandShake(const TcpConnPtr& conn) {
     statecb_(conn);
 }
 
-void TcpConn::Send(const char* msg, size_t len) {}
+void TcpConn::Send(const char* msg, size_t len) {
+    loop_->RunInLoop([&]() {
+        if (channel_) {
+            output_.Append(msg, len);
+            if (output_.size() && !channel_->WriteEnabled()) {
+                channel_->WriteEnabled();
+            }
+        }
+    });
+}
 
-void TcpConn::SendMsg(Slice& s) {}
+void TcpConn::Send(Buffer& msg) {
+    loop_->RunInLoop([&]() {
+        if (channel_) {
+            output_.Append(msg);
+            if (output_.size()&&!channel_->WriteEnabled()) {
+                channel_->WriteEnabled();
+            }
+        }
+    });
+}
+
+void TcpConn::SendMsg(Slice& msg) {
+    codec_->Encode(msg, output_);
+    SendOutPut();
+}
 
 void TcpConn::Connect(Eventloop* loop,
                       const std::string& host,

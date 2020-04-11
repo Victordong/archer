@@ -10,6 +10,10 @@ namespace archer {
 
 class TcpServer : noncopyable {
    public:
+    enum LoadMode {
+
+    };
+
     TcpServer(int num, const std::string& host = "", unsigned short port = 8080)
         : addr_(host, port),
           reactors_num_(num),
@@ -46,6 +50,7 @@ class TcpServer : noncopyable {
     std::vector<std::unique_ptr<Eventloop>> reactors_;
 
     Ip4Addr addr_;
+    LoadMode mode_;
 
     TcpCallback readcb_, statecb_, closecb_;
     TcpMsgCallBack msgcb_;
