@@ -4,6 +4,7 @@
 
 #include "archer/net/poller/epoll_poller.hpp"
 #include "archer/net/timer/timer_queue.hpp"
+#include "archer/base/thread.hpp"
 
 using namespace archer;
 
@@ -29,6 +30,7 @@ Eventloop::~Eventloop() {}
 void Eventloop::Loop() {
     quit_ = false;
     looping_ = true;
+    thread_id_ = CurrentThread::gettid();
 
     while (!quit_) {
         poller_->Poll(kPollTimeMs, active_channels_);

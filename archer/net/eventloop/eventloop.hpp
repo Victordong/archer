@@ -88,6 +88,9 @@ class Eventloop final : noncopyable {
     std::mutex mutex_;
 
     std::atomic_int total_;
+
+    int thread_id_;
+
 };
 };  // namespace archer
 
