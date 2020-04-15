@@ -1,8 +1,6 @@
 #ifndef _ARCHER_CHANNEL_HPP
 #define _ARCHER_CHANNEL_HPP
 
-#include <functional>
-#include <vector>
 
 #include "archer/net/eventloop/eventloop.hpp"
 

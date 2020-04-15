@@ -10,19 +10,7 @@
 #include "archer/net/eventloop/eventloop.hpp"
 
 namespace archer {
-class TcpServer;
-class TcpConn;
 
-using TcpServerPtr = std::shared_ptr<TcpServer>;
-using TcpConnPtr = std::shared_ptr<TcpConn>;
-using AcceptorPtr = std::shared_ptr<Acceptor>;
-using CodecImpPtr = std::shared_ptr<CodecImp>;
-
-using TcpCreateCallback = std::function<TcpConnPtr()>;
-using TcpCallback = std::function<void(const TcpConnPtr&)>;
-using TcpMsgCallBack = std::function<void(const TcpConnPtr&, const Slice&)>;
-using RetMsgCallBack =
-    std::function<std::string(const TcpConnPtr&, const std::string& msg)>;
 
 static size_t kMallocSize = 1024;
 

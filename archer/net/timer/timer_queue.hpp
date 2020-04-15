@@ -11,8 +11,6 @@
 
 namespace archer {
 
-class Timer;
-
 class TimerQueue : noncopyable {
    public:
     using Entry = std::pair<Timestamp, Timer*>;

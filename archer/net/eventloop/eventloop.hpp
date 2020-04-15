@@ -1,20 +1,9 @@
 #ifndef _ARCHER_EVENTLOOP_HPP
 #define _ARCHER_EVENTLOOP_HPP
 
-#include <assert.h>
-#include <sys/epoll.h>
-#include <sys/timerfd.h>
-#include <unistd.h>
-
-#include <atomic>
-#include <iostream>
-#include <map>
-#include <memory>
-#include <mutex>
-#include <vector>
+#include "archer/net/archer_imp.hpp"
 
 #include "archer/base/noncopyable.hpp"
-#include "archer/net/type.hpp"
 
 namespace archer {
 
@@ -22,20 +11,6 @@ static const int kReadEvent = EPOLLIN | EPOLLPRI | EPOLLHUP;
 static const int kWriteEvent = EPOLLOUT;
 static const int kErrorEvent = EPOLLERR;
 static const int kNoneEvent = 0;
-
-class Poller;
-
-class Channel;
-
-class TimerQueue;
-
-class Timer;
-
-using TimerPtr = std::shared_ptr<Timer>;
-
-using TimerId = std::shared_ptr<Timer>;
-
-using ChannelPtr = std::shared_ptr<Channel>;
 
 class Eventloop final : noncopyable {
    public:
