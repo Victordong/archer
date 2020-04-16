@@ -33,6 +33,11 @@ class Eventloop final : noncopyable {
     void RunInLoop(const Functor& func);
     void QueueInLoop(const Functor& func);
 
+    void callIdles();
+    IdleId RegisterIdle(int idle,const TcpConnPtr & ptr,const TcpCallback& cb);
+    void UnRegisterIdle(const IdleId&);
+    void UpdateIdle(const IdleId&);
+
     std::atomic_int& total() { return total_; };
 
    private:
@@ -66,6 +71,11 @@ class Eventloop final : noncopyable {
 
     int thread_id_;
 
+    bool idle_enabled_;
+
+    IdleMap idle_map_;
+
+    TimerId idle_timerid_;
 };
 };  // namespace archer
 

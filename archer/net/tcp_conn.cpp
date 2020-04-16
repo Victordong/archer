@@ -84,10 +84,16 @@ void TcpConn::handleWrite(const TcpConnPtr& conn) {
 void TcpConn::handleClose(const TcpConnPtr& conn) {
     if (state_ == ConnState::Connected) {
         state_ = ConnState::Closed;
+
         channel_->Remove();
+        channel_.reset();
+
         loop_->total()--;
+
         statecb_(conn);
         closecb_(conn);
+
+        readcb_ = writcb_ = statecb_ = closecb_ = nullptr;
     }
 }
 

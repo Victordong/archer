@@ -2,9 +2,10 @@
 
 #include <sys/eventfd.h>
 
+#include "archer/base/thread.hpp"
 #include "archer/net/poller/epoll_poller.hpp"
 #include "archer/net/timer/timer_queue.hpp"
-#include "archer/base/thread.hpp"
+#include "archer/net/timer/idle.hpp"
 
 using namespace archer;
 
@@ -15,7 +16,8 @@ Eventloop::Eventloop()
       poller_(new Poller()),
       timer_queue_(new TimerQueue(this)),
       wakeup_fd_(eventfd(0, EFD_NONBLOCK | EFD_CLOEXEC)),
-      wakeup_channel_(new Channel(this, wakeup_fd())) {
+      wakeup_channel_(new Channel(this, wakeup_fd())),
+      idle_enabled_(false) {
     assert(wakeup_fd() > 0);
     poller_->AddChannel(*wakeup_channel_);
     wakeup_channel_->set_read_callback([&]() {
@@ -110,4 +112,22 @@ TimerId Eventloop::RunEvery(const TimerCallback& cb, double interval) {
 
 void Eventloop::CancelTimer(TimerId& ti) {
     timer_queue_->CancelTimer(ti);
+}
+
+IdleId Eventloop::RegisterIdle(int idle,
+                               const TcpConnPtr& conn,
+                               const TcpCallback& cb) {
+    if(!idle_enabled_) {
+        idle_enabled_ = true;
+        RunEvery([=]() { callIdles(); }, Timestamp::kMicroSecondsPerSecond);
+    }
+    auto lst = idle_map_[idle];
+    lst.push_back(IdleNode(conn, cb, Timestamp::Now()));
+    return IdleId(new Idle(&lst, --lst.end()));
+}
+
+void Eventloop::UnRegisterIdle(const IdleId & idle) {}
+
+void Eventloop::UpdateIdle(const IdleId& idle) {
+    
 }

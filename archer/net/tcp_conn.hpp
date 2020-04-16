@@ -113,7 +113,6 @@ class TcpConn : public std::enable_shared_from_this<TcpConn>, noncopyable {
     Buffer output_, input_;
 
     TcpCallback readcb_, writcb_, statecb_, closecb_;
-    TcpMsgCallBack msgcb_;
 
     TimerId timerout_id_;
 
@@ -125,6 +124,8 @@ class TcpConn : public std::enable_shared_from_this<TcpConn>, noncopyable {
 
     int dest_port_, connection_timeout_, reconnect_interval_;
     int64_t connected_time_;
+
+    IdleIdList lst_;
 };
 };  // namespace archer
 

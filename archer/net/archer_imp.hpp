@@ -37,6 +37,8 @@ class Idle;
 using IdleList = std::list<IdleNode>;
 using IdleIter = std::list<IdleNode>::iterator;
 using IdleId = std::shared_ptr<Idle>;
+using IdleMap = std::map<int, IdleList>;
+using IdleIdList = std::vector<IdleId>;
 
 using SocketPtr = std::unique_ptr<Socket>;
 using Functor = std::function<void()>;
