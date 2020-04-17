@@ -4,8 +4,8 @@
 
 #include "archer/base/thread.hpp"
 #include "archer/net/poller/epoll_poller.hpp"
-#include "archer/net/timer/timer_queue.hpp"
 #include "archer/net/timer/idle.hpp"
+#include "archer/net/timer/timer_queue.hpp"
 
 using namespace archer;
 
@@ -114,10 +114,27 @@ void Eventloop::CancelTimer(TimerId& ti) {
     timer_queue_->CancelTimer(ti);
 }
 
+void Eventloop::callIdles() {
+    auto current = Timestamp::Now();
+    for (auto& item : idle_map_) {
+        auto idle_time = item.first*Timestamp::kMicroSecondsPerSecond;
+        auto& lst = item.second;
+        while(!lst.empty()) {
+            auto& node = lst.front();
+            if(node.updated()+idle_time>current) {
+                break;
+            }
+            lst.splice(lst.begin(), lst, lst.end());
+            node.set_updated(Timestamp::Now());
+            node.callback();
+        }
+    }
+}
+
 IdleId Eventloop::RegisterIdle(int idle,
                                const TcpConnPtr& conn,
                                const TcpCallback& cb) {
-    if(!idle_enabled_) {
+    if (!idle_enabled_) {
         idle_enabled_ = true;
         RunEvery([=]() { callIdles(); }, Timestamp::kMicroSecondsPerSecond);
     }
@@ -126,8 +143,13 @@ IdleId Eventloop::RegisterIdle(int idle,
     return IdleId(new Idle(&lst, --lst.end()));
 }
 
-void Eventloop::UnRegisterIdle(const IdleId & idle) {}
+void Eventloop::UnRegisterIdle(const IdleId& idle) {
+    idle->lst()->erase(idle->iter());
+}
 
 void Eventloop::UpdateIdle(const IdleId& idle) {
-    
+    auto lst = idle->lst();
+    auto iter = idle->iter();
+    iter->set_updated(Timestamp::Now());
+    lst->splice(lst->end(), *lst, iter);
 }

@@ -44,6 +44,9 @@ void TcpConn::OnMsg(CodecImp* codec, const TcpMsgCallBack& cb) {
 
 void TcpConn::handleRead(const TcpConnPtr& conn) {
     if (state_ == ConnState::Connected) {
+        for (auto& idle : lst_) {
+            updateIdle(idle);
+        }
         input_.malloc(kMallocSize);
         int result = readImp(channel_->fd(), input_.end(), input_.space());
         if (result < 0) {
@@ -84,6 +87,10 @@ void TcpConn::handleWrite(const TcpConnPtr& conn) {
 void TcpConn::handleClose(const TcpConnPtr& conn) {
     if (state_ == ConnState::Connected) {
         state_ = ConnState::Closed;
+
+        for (auto& idle_id : lst_) {
+            unregisterIdle(idle_id);
+        }
 
         channel_->Remove();
         channel_.reset();
@@ -127,7 +134,7 @@ void TcpConn::Send(Buffer& msg) {
     loop_->RunInLoop([&]() {
         if (channel_) {
             output_.Append(msg);
-            if (output_.size()&&!channel_->WriteEnabled()) {
+            if (output_.size() && !channel_->WriteEnabled()) {
                 channel_->WriteEnabled();
             }
         }
@@ -150,3 +157,16 @@ void TcpConn::ReConnect() {}
 void TcpConn::Close() {}
 
 void TcpConn::Cleanup(const TcpConnPtr& conn) {}
+
+void TcpConn::AddIdleCB(int idle, const TcpCallback& cb){
+    auto idle_id = loop_->RegisterIdle(idle, shared_from_this(), cb);
+    lst_.push_back(idle_id);
+}
+
+void TcpConn::unregisterIdle(const IdleId& idle){
+    loop_->UnRegisterIdle(idle);
+}
+
+void TcpConn::updateIdle(const IdleId& idle){
+    loop_->UpdateIdle(idle);
+}

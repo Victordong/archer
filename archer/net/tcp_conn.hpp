@@ -87,6 +87,12 @@ class TcpConn : public std::enable_shared_from_this<TcpConn>, noncopyable {
     void handleError(const TcpConnPtr& conn);
     void handleHandShake(const TcpConnPtr& conn);
 
+    void AddIdleCB(int idle, const TcpCallback& cb);
+
+    void unregisterIdle(const IdleId& idle);
+
+    void updateIdle(const IdleId& idle);
+
     void Cleanup(const TcpConnPtr& conn);
 
     void Connect(Eventloop* loop,
