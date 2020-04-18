@@ -8,7 +8,7 @@ Socket::Socket(int domain, int type, int protocol) {
     assert(fd_ > 0);
 }
 
-void Socket::SetNonBlock(int fd, bool value) {
+int Socket::SetNonBlock(int fd, bool value) {
     int flags = ::fcntl(fd, F_GETFL, 0);
     int result;
     if (value) {
@@ -16,50 +16,56 @@ void Socket::SetNonBlock(int fd, bool value) {
     } else {
         result = ::fcntl(fd, F_SETFL, flags & ~O_NONBLOCK);
     }
-    assert(result >= 0);
+    return result;
 }
 
-void Socket::SetReusePort(int fd, bool value) {
+int Socket::SetReusePort(int fd, bool value) {
     int flag = value;
     int len = sizeof flag;
     int result = ::setsockopt(fd, SOL_SOCKET, SO_REUSEPORT, &flag, len);
-    assert(result >= 0);
+    return result;
 }
 
-void Socket::SetReuseAddr(int fd, bool value) {
+int Socket::SetReuseAddr(int fd, bool value) {
     int flag = value;
     int len = sizeof flag;
     int result = ::setsockopt(fd, SOL_SOCKET, SO_REUSEADDR, &flag, len);
-    assert(result >= 0);
+    return result;
 }
 
-void Socket::SetNoDelay(int fd, bool value) {
+int Socket::SetNoDelay(int fd, bool value) {
     int flag = value;
     int len = sizeof flag;
     int result = ::setsockopt(fd, SOL_SOCKET, TCP_NODELAY, &flag, len);
-    assert(result >= 0);
+    return result;
 }
 
-void Socket::SetKeepAlive(int fd, bool value) {
+int Socket::SetKeepAlive(int fd, bool value) {
     int optval = value ? 1 : 0;
-    ::setsockopt(fd, SOL_SOCKET, SO_KEEPALIVE, &optval,
-                 static_cast<socklen_t>(sizeof optval));
+    int result = ::setsockopt(fd, SOL_SOCKET, SO_KEEPALIVE, &optval,
+                              static_cast<socklen_t>(sizeof optval));
+    return result;
 }
 
-void Socket::AddFlag(int fd, int flag) {
+int Socket::AddFlag(int fd, int flag) {
     int ret = fcntl(fd, F_GETFD);
     int result = ::fcntl(fd, F_SETFD, ret | flag);
-    assert(result >= 0);
+    return result;
 }
 
-void Socket::Bind(struct sockaddr* addr) {
-    int result = ::bind(fd_, addr, sizeof *addr);
-    assert(result >= 0);
+int Socket::Bind(int fd, struct sockaddr* addr) {
+    int result = ::bind(fd, addr, sizeof *addr);
+    return result;
 }
 
-void Socket::Listen(int backlog_size) {
+int Connect(int fd, struct sockaddr*addr) {
+    int result = ::connect(fd, addr, sizeof *addr);
+    return result;
+}
+
+int Socket::Listen(int backlog_size) {
     int result = ::listen(fd_, backlog_size);
-    assert(result >= 0);
+    return result;
 }
 
 int Socket::Accept(struct sockaddr* addr) {

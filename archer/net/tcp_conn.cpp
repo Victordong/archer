@@ -115,8 +115,12 @@ void TcpConn::handleError(const TcpConnPtr& conn) {
 }
 
 void TcpConn::handleHandShake(const TcpConnPtr& conn) {
-    state_ = ConnState::Connected;
-    statecb_(conn);
+    if(conn->isClient()) {
+         
+    } else {
+        state_ = ConnState::Connected;
+        statecb_(conn);
+    }
 }
 
 void TcpConn::Send(const char* msg, size_t len) {
@@ -150,7 +154,43 @@ void TcpConn::Connect(Eventloop* loop,
                       const std::string& host,
                       unsigned short port,
                       int timeout,
-                      const std::string& local_ip) {}
+                      const std::string& local_ip) {
+    dest_host_ = host;
+    dest_port_ = port;
+    connection_timeout_ = timeout;
+    connected_time_ = Timestamp::Now();
+    local_ip_ = local_ip;
+
+    int fd = ::socket(AF_INET, SOCK_STREAM, 0);
+
+    int result = Socket::SetNonBlock(fd, true);
+
+    result = Socket::AddFlag(fd, FD_CLOEXEC);
+
+    Ip4Addr dest_addr(host, port);
+
+    if (local_ip.size()) {
+        Ip4Addr src_addr(local_ip, 0);
+        Socket::Bind(fd, &src_addr.addr());
+    }
+
+    if(result==0) {
+        result = Socket::Connect(fd, &dest_addr.addr());
+    }
+
+    auto src_addr = Socket::GetLocalAddr(fd);
+
+    state_ = ConnState::Handshaking;
+    attach(loop, fd, src_addr, dest_addr);
+    if (timeout) {
+        auto tcp_conn = shared_from_this();
+        timerout_id_ = loop_->RunAfter([&]() {
+            if (tcp_conn->state() == ConnState::Handshaking) {
+                handleClose(tcp_conn);
+            }
+        }, timeout);
+    }
+}
 
 void TcpConn::ReConnect() {}
 
@@ -158,15 +198,15 @@ void TcpConn::Close() {}
 
 void TcpConn::Cleanup(const TcpConnPtr& conn) {}
 
-void TcpConn::AddIdleCB(int idle, const TcpCallback& cb){
+void TcpConn::AddIdleCB(int idle, const TcpCallback& cb) {
     auto idle_id = loop_->RegisterIdle(idle, shared_from_this(), cb);
     lst_.push_back(idle_id);
 }
 
-void TcpConn::unregisterIdle(const IdleId& idle){
+void TcpConn::unregisterIdle(const IdleId& idle) {
     loop_->UnRegisterIdle(idle);
 }
 
-void TcpConn::updateIdle(const IdleId& idle){
+void TcpConn::updateIdle(const IdleId& idle) {
     loop_->UpdateIdle(idle);
 }

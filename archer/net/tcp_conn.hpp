@@ -129,7 +129,7 @@ class TcpConn : public std::enable_shared_from_this<TcpConn>, noncopyable {
     std::unique_ptr<CodecImp> codec_;
 
     int dest_port_, connection_timeout_, reconnect_interval_;
-    int64_t connected_time_;
+    Timestamp connected_time_;
 
     IdleIdList lst_;
 };
