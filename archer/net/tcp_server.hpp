@@ -8,11 +8,10 @@
 
 namespace archer {
 
+enum LoadMode { RoundRoBin, LeastConnections, Random };
+
 class TcpServer : noncopyable {
    public:
-    enum LoadMode {
-
-    };
 
     TcpServer(int num, const std::string& host = "", unsigned short port = 8080)
         : addr_(host, port),
@@ -23,7 +22,7 @@ class TcpServer : noncopyable {
     static TcpServerPtr InitServer(int num,
                                    const std::string& host,
                                    unsigned short port,
-                                   bool reuse_port = false);
+                                   bool reuse_port = false, LoadMode mode=LoadMode::RoundRoBin);
 
     Ip4Addr addr() { return addr_; };
 

@@ -38,7 +38,7 @@ class Eventloop final : noncopyable {
     void UnRegisterIdle(const IdleId&);
     void UpdateIdle(const IdleId&);
 
-    std::atomic_int& total() { return total_; };
+    std::atomic_uint64_t& total() { return total_; };
 
    private:
     using ChannelList = std::vector<Channel*>;
@@ -67,7 +67,7 @@ class Eventloop final : noncopyable {
 
     std::mutex mutex_;
 
-    std::atomic_int total_;
+    std::atomic_uint64_t total_;
 
     int thread_id_;
 

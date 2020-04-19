@@ -1,11 +1,16 @@
 #include "archer/net/tcp_server.hpp"
+
+#include <stdlib.h>
+#include <time.h>
 using namespace archer;
 
 TcpServerPtr TcpServer::InitServer(int num,
                                    const std::string& host,
                                    unsigned short port,
-                                   bool reuse_port) {
+                                   bool reuse_port,
+                                   LoadMode mode) {
     auto server = std::make_shared<TcpServer>(TcpServer(num, host, port));
+    server->mode_ = mode;
     server->acceptor_.reset(new Acceptor(host, port, reuse_port));
     server->acceptor_->set_new_conncb_(
         [server](int fd, Ip4Addr local_addr, Ip4Addr peer_addr) {
@@ -14,6 +19,7 @@ TcpServerPtr TcpServer::InitServer(int num,
     for (auto& reactor : server->reactors_) {
         reactor = std::unique_ptr<Eventloop>(new Eventloop);
     }
+
     return server;
 }
 
@@ -72,15 +78,29 @@ void TcpServer::Start() {
 }
 
 Eventloop* TcpServer::getSubReactors() {
-    // switch (expression)
-    // {
-    // case /* constant-expression */:
-    //     /* code */
-    //     break;
-
-    // default:
-    //     break;
-    // }
+    Eventloop* loop;
+    uint64_t number;
+    switch (mode_) {
+        case LoadMode::RoundRoBin:
+            number = total_connections_ % reactors_num_;
+            break;
+        case LoadMode::LeastConnections:
+            number = 0;
+            for (int i = 1; i < reactors_.size();i++) {
+                if(reactors_[i]->total() < reactors_[number]->total()) {
+                    number = i;
+                }
+            }
+            break;
+        case LoadMode::Random:
+            srand((unsigned)time(NULL));
+            number = rand() % 4;
+            break;
+        default:
+            number = 0;
+            break;
+    }
+    return reactors_[number].get();
 }
 
 HSHAPtr HSHA::InitServer(int num,
@@ -111,8 +131,8 @@ void HSHA::OnConnMsg(const RetMsgCallBack& cb, CodecImp* codec) {
     TcpServer::OnConnMsg(
         [&](const TcpConnPtr& conn, const Slice& slice) {
             std::string msg = slice;
-            thread_pool_.AddTask([&]() { 
-                auto result =  cb(conn, msg);
+            thread_pool_.AddTask([&]() {
+                auto result = cb(conn, msg);
                 conn->loop()->RunInLoop([=]() { conn->SendMsg(result); });
             });
         },

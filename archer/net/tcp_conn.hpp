@@ -3,7 +3,6 @@
 
 #include <string.h>
 
-#include "archer/base/buffer.hpp"
 #include "archer/net/acceptor.hpp"
 #include "archer/net/codec.hpp"
 #include "archer/net/eventloop/channel.hpp"
@@ -55,15 +54,15 @@ class TcpConn : public std::enable_shared_from_this<TcpConn>, noncopyable {
         return channel_ ? channel_->revents() & archer::kWriteEvent : false;
     };
     void set_reconnect_interval(int milli) { reconnect_interval_ = milli; };
-    Buffer& output() { return output_; };
-    Buffer& input() { return input_; };
+    Buffer& output() { return *output_; };
+    Buffer& input() { return *input_; };
 
     void Send(const char* msg, size_t len);
     void Send(Buffer& msg);
     void Send(const std::string& msg) { Send(msg.data(), msg.size()); };
     void Send(const char* msg) { Send(msg, strlen(msg)); };
 
-    void SendOutPut() { Send(output_); };
+    void SendOutPut() { Send(*output_); };
 
     void SendMsg(Slice &s);
     void SendMsg(const std::string& s) { SendMsg(Slice(s)); };
@@ -116,7 +115,7 @@ class TcpConn : public std::enable_shared_from_this<TcpConn>, noncopyable {
     ChannelPtr channel_;
     ConnState state_;
 
-    Buffer output_, input_;
+    BufferPtr output_, input_;
 
     TcpCallback readcb_, writcb_, statecb_, closecb_;
 

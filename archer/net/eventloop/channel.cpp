@@ -15,6 +15,7 @@ void Channel::update() {
 
 void Channel::Remove() {
     loop_->RemoveChannel(*this);
+    
 }
 
 void Channel::handleEvent() {

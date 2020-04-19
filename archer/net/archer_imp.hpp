@@ -48,6 +48,8 @@ using TimerId = std::shared_ptr<Timer>;
 
 using ChannelPtr = std::shared_ptr<Channel>;
 
+using BufferPtr = std::unique_ptr<Buffer>;
+
 using TcpServerPtr = std::shared_ptr<TcpServer>;
 using TcpConnPtr = std::shared_ptr<TcpConn>;
 using AcceptorPtr = std::shared_ptr<Acceptor>;

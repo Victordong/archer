@@ -81,7 +81,7 @@ class Socket {
     int Accept(struct sockaddr*);
     int Accept(struct sockaddr_in* addr) { return Accept((sockaddr*)addr); };
 
-    int Close(int fd) { return ::close(fd); };
+    static int Close(int fd) { return ::close(fd); };
 
     static Ip4Addr GetLocalAddr(int fd);
     static Ip4Addr GetPeerAddr(int fd);
