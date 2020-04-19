@@ -18,6 +18,7 @@ class Channel : noncopyable {
     void set_error_callback(const EventCallback& cb) { error_callback_ = cb; };
 
     int fd() const { return fd_.fd(); };
+    const Socket& socket() { return fd_; };
     int events() const { return events_; };
 
     int revents() const { return revents_; };
@@ -52,8 +53,9 @@ class Channel : noncopyable {
         update();
     };
 
-    void Close(){
-
+    void Close() {
+        DisableAll();
+        Remove();
     };
 
     void Remove();

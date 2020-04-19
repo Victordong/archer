@@ -144,12 +144,16 @@ IdleId Eventloop::RegisterIdle(int idle,
 }
 
 void Eventloop::UnRegisterIdle(const IdleId& idle) {
-    idle->lst()->erase(idle->iter());
+    if(idle_enabled_) {
+        idle->lst()->erase(idle->iter());
+    }
 }
 
 void Eventloop::UpdateIdle(const IdleId& idle) {
-    auto lst = idle->lst();
-    auto iter = idle->iter();
-    iter->set_updated(Timestamp::Now());
-    lst->splice(lst->end(), *lst, iter);
+    if(idle_enabled_) {
+        auto lst = idle->lst();
+        auto iter = idle->iter();
+        iter->set_updated(Timestamp::Now());
+        lst->splice(lst->end(), *lst, iter);
+    }
 }

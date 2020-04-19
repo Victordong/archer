@@ -6,21 +6,31 @@ TcpConn::TcpConn() : state_(ConnState::Invalid) {}
 TcpConn::~TcpConn() {}
 
 void TcpConn::attach(Eventloop* loop, int fd, Ip4Addr local, Ip4Addr peer) {
+    state_ = ConnState::Handshaking;
+
     loop_ = loop;
     local_ = local;
     peer_ = peer;
-    state_ = ConnState::Handshaking;
 
     TcpConnPtr conn = shared_from_this();
 
     channel_.reset(new Channel(loop, fd));
     loop_->AddChannel(*channel_);
-    channel_->set_read_callback([=]() { conn->handleRead(conn); });
-    channel_->set_write_callback([=]() { conn->handleWrite(conn); });
-    channel_->set_error_callback([=]() { conn->handleError(conn); });
-    channel_->EnableReading();
 
-    handleHandShake(conn);
+    if(conn->isClient()) {
+        channel_->set_write_callback([=]() {
+            Ip4Addr peer_addr;
+            auto result = Socket::GetPeerAddr(channel_->fd(), peer_addr);
+            if (result < 0) {
+                handleError(conn);
+            } else {
+                channel_->DisableAll();
+                handleHandShake(conn);
+            }
+        });
+    } else {
+        handleHandShake(conn);
+    }
 
     Socket::SetKeepAlive(channel_->fd());
 }
@@ -113,13 +123,16 @@ void TcpConn::handleError(const TcpConnPtr& conn) {
 }
 
 void TcpConn::handleHandShake(const TcpConnPtr& conn) {
-    if(conn->isClient()) {
-         
-    } else {
-        state_ = ConnState::Connected;
-        if (statecb_) {
-            statecb_(conn);
-        }
+    if(conn->state_ != ConnState::Handshaking) {
+        return;
+    }
+    state_ = ConnState::Connected;
+    channel_->set_read_callback([=]() { conn->handleRead(conn); });
+    channel_->set_write_callback([=]() { conn->handleWrite(conn); });
+    channel_->set_error_callback([=]() { conn->handleError(conn); });
+    channel_->EnableReading();
+    if (statecb_) {
+        statecb_(conn);
     }
 }
 
@@ -177,8 +190,9 @@ void TcpConn::Connect(Eventloop* loop,
     if(result==0) {
         result = Socket::Connect(fd, &dest_addr.addr());
     }
+    Ip4Addr src_addr;
 
-    auto src_addr = Socket::GetLocalAddr(fd);
+    result = Socket::GetLocalAddr(fd, src_addr);
 
     state_ = ConnState::Handshaking;
     attach(loop, fd, src_addr, dest_addr);

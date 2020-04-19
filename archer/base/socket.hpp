@@ -83,8 +83,10 @@ class Socket {
 
     static int Close(int fd) { return ::close(fd); };
 
-    static Ip4Addr GetLocalAddr(int fd);
-    static Ip4Addr GetPeerAddr(int fd);
+    int GetLocalAddr(Ip4Addr& addr) { return GetLocalAddr(fd_, addr); };
+    static int GetLocalAddr(int fd, Ip4Addr& addr);
+    int GetPeerAddr(Ip4Addr& addr) { return GetPeerAddr(fd_, addr); };
+    static int GetPeerAddr(int fd, Ip4Addr &addr);
 
    private:
     int fd_;

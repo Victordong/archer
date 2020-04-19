@@ -76,18 +76,16 @@ int Socket::Accept(struct sockaddr* addr) {
     return conn_fd;
 }
 
-Ip4Addr Socket::GetLocalAddr(int fd) {
-    Ip4Addr local_addr;
-    socklen_t local_len = sizeof(local_addr.addr());
-    int result = ::getsockname(fd, (sockaddr*)&local_addr.addr(), &local_len);
-    return local_addr;
+int Socket::GetLocalAddr(int fd, Ip4Addr& addr) {
+    socklen_t local_len = sizeof(addr.addr());
+    int result = ::getsockname(fd, (sockaddr*)&addr.addr(), &local_len);
+    return result;
 }
 
-Ip4Addr Socket::GetPeerAddr(int fd) {
-    Ip4Addr local_addr;
-    socklen_t local_len = sizeof(local_addr.addr());
-    int result = ::getpeername(fd, (sockaddr*)&local_addr.addr(), &local_len);
-    return local_addr;
+int Socket::GetPeerAddr(int fd, Ip4Addr& addr) {
+    socklen_t local_len = sizeof(addr.addr());
+    int result = ::getpeername(fd, (sockaddr*)&addr.addr(), &local_len);
+    return result;
 }
 
 Ip4Addr::Ip4Addr(const std::string& host, unsigned short port) {
