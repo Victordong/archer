@@ -12,17 +12,19 @@ enum LoadMode { RoundRoBin, LeastConnections, Random };
 
 class TcpServer : noncopyable {
    public:
-
     TcpServer(int num, const std::string& host = "", unsigned short port = 8080)
         : addr_(host, port),
           reactors_num_(num),
-          reactors_(num){};
-    ~TcpServer();
+          reactors_(num),
+          conncb_([]() -> TcpConnPtr { return std::make_shared<TcpConn>(); }){};
+
+    ~TcpServer(){};
 
     static TcpServerPtr InitServer(int num,
                                    const std::string& host,
                                    unsigned short port,
-                                   bool reuse_port = false, LoadMode mode=LoadMode::RoundRoBin);
+                                   bool reuse_port = false,
+                                   LoadMode mode = LoadMode::RoundRoBin);
 
     Ip4Addr addr() { return addr_; };
 

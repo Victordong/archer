@@ -121,6 +121,8 @@ class Buffer {
         return *this;
     };  // shiftN
 
+    Buffer& AddSize(size_t len) { write_pos_ += len; }
+
     Buffer& operator=(const Buffer& buf) {
         if (&buf == this) {
             return *this;

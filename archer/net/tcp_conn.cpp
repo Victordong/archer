@@ -1,7 +1,8 @@
 #include "archer/net/tcp_conn.hpp"
 using namespace archer;
 
-TcpConn::TcpConn() : state_(ConnState::Invalid) {}
+TcpConn::TcpConn()
+    : state_(ConnState::Invalid), output_(new Buffer), input_(new Buffer) {}
 
 TcpConn::~TcpConn() {}
 
@@ -17,7 +18,7 @@ void TcpConn::attach(Eventloop* loop, int fd, Ip4Addr local, Ip4Addr peer) {
     channel_.reset(new Channel(loop, fd));
     loop_->AddChannel(*channel_);
 
-    if(conn->isClient()) {
+    if (conn->isClient()) {
         channel_->set_write_callback([=]() {
             Ip4Addr peer_addr;
             auto result = Socket::GetPeerAddr(channel_->fd(), peer_addr);
@@ -68,6 +69,7 @@ void TcpConn::handleRead(const TcpConnPtr& conn) {
         } else if (result == 0) {
             handleClose(conn);
         } else {
+            input_->AddSize(result);
             if (readcb_) {
                 readcb_(conn);
             }
@@ -77,7 +79,8 @@ void TcpConn::handleRead(const TcpConnPtr& conn) {
 
 void TcpConn::handleWrite(const TcpConnPtr& conn) {
     if (state_ == ConnState::Connected) {
-        int result = writeImp(channel_->fd(), output_->begin(), output_->size());
+        int result =
+            writeImp(channel_->fd(), output_->begin(), output_->size());
         if (result > 0) {
             output_->Consume(result);
         } else if (result < 0) {
@@ -123,7 +126,7 @@ void TcpConn::handleError(const TcpConnPtr& conn) {
 }
 
 void TcpConn::handleHandShake(const TcpConnPtr& conn) {
-    if(conn->state_ != ConnState::Handshaking) {
+    if (conn->state_ != ConnState::Handshaking) {
         return;
     }
     state_ = ConnState::Connected;
@@ -151,8 +154,16 @@ void TcpConn::Send(Buffer& msg) {
     loop_->RunInLoop([&]() {
         if (channel_) {
             output_->Append(msg);
+            if (output_->size()) {
+                std::cout << output_->size() << std::endl;
+            }
+
+            if (!channel_->WriteEnabled()) {
+                std::cout << "不可写" << std::endl;
+            }
+
             if (output_->size() && !channel_->WriteEnabled()) {
-                channel_->WriteEnabled();
+                channel_->EnableWriting();
             }
         }
     });
@@ -174,9 +185,9 @@ void TcpConn::Connect(Eventloop* loop,
     connected_time_ = Timestamp::Now();
     local_ip_ = local_ip;
 
-    int fd = ::socket(AF_INET, SOCK_STREAM, 0);
+    auto fd = ::socket(AF_INET, SOCK_STREAM, 0);
 
-    int result = Socket::SetNonBlock(fd, true);
+    auto result = Socket::SetNonBlock(fd, true);
 
     result = Socket::AddFlag(fd, FD_CLOEXEC);
 
@@ -187,7 +198,7 @@ void TcpConn::Connect(Eventloop* loop,
         Socket::Bind(fd, &src_addr.addr());
     }
 
-    if(result==0) {
+    if (result == 0) {
         result = Socket::Connect(fd, &dest_addr.addr());
     }
     Ip4Addr src_addr;
@@ -199,11 +210,13 @@ void TcpConn::Connect(Eventloop* loop,
 
     if (timeout) {
         auto tcp_conn = shared_from_this();
-        timerout_id_ = loop_->RunAfter([=]() {
-            if (tcp_conn->state() == ConnState::Handshaking) {
-                handleClose(tcp_conn);
-            }
-        }, timeout);
+        timerout_id_ = loop_->RunAfter(
+            [=]() {
+                if (tcp_conn->state() == ConnState::Handshaking) {
+                    handleClose(tcp_conn);
+                }
+            },
+            timeout);
     }
 }
 
@@ -215,8 +228,16 @@ void TcpConn::Close() {
 }
 
 void TcpConn::Cleanup(const TcpConnPtr& conn) {
+    if (readcb_ && input_->size()) {
+        readcb_(conn);
+    }
+
     for (auto& idle_id : lst_) {
         unregisterIdle(idle_id);
+    }
+
+    if (timerout_id_) {
+        loop_->CancelTimer(timerout_id_);
     }
 
     channel_->Remove();

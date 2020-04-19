@@ -17,7 +17,7 @@ class Acceptor {
              bool reuse_port = false,
              int block_size = 20)
         : Acceptor(Ip4Addr(host, port), reuse_port, block_size){};
-    ~Acceptor();
+    ~Acceptor(){};
 
     Eventloop* loop() { return loop_.get(); };
 

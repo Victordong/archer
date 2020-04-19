@@ -13,11 +13,11 @@ Acceptor::Acceptor(const Ip4Addr& addr, bool reuse_port, int backlog_size)
     listen_channel_->set_read_callback([=]() { this->handleAccept(); });
     loop_->AddChannel(*listen_channel_);
 
-    listenfd_.SetNonBlock(true);
-    listenfd_.SetReuseAddr(true);
-    listenfd_.SetReusePort(reuse_port);
-    listenfd_.AddFlag(FD_CLOEXEC);
-    listenfd_.Bind(&addr_.addr());
+    int result = listenfd_.SetNonBlock(true);
+    result = listenfd_.SetReuseAddr(true);
+    result = listenfd_.SetReusePort(reuse_port);
+    result = listenfd_.AddFlag(FD_CLOEXEC);
+    result = listenfd_.Bind(&addr_.addr());
 }
 
 void Acceptor::handleAccept() {
@@ -25,7 +25,8 @@ void Acceptor::handleAccept() {
     int conn_fd = listenfd_.Accept(&peer_addr.addr());
     if (conn_fd > 0) {
         if (conncb_) {
-            Ip4Addr local_addr = Socket::GetLocalAddr(conn_fd);
+            Ip4Addr local_addr;
+            int result = Socket::GetLocalAddr(conn_fd, local_addr);
             conncb_(conn_fd, local_addr, peer_addr);
         } else {
             Socket::Close(conn_fd);

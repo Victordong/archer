@@ -72,7 +72,7 @@ class Socket {
     };
 
     static int Connect(int fd, struct sockaddr*);
-    static int Connect(int fd, sockaddr_in* addr){
+    static int Connect(int fd, struct sockaddr_in* addr) {
         return Connect(fd, (sockaddr*)addr);
     };
 
@@ -86,7 +86,7 @@ class Socket {
     int GetLocalAddr(Ip4Addr& addr) { return GetLocalAddr(fd_, addr); };
     static int GetLocalAddr(int fd, Ip4Addr& addr);
     int GetPeerAddr(Ip4Addr& addr) { return GetPeerAddr(fd_, addr); };
-    static int GetPeerAddr(int fd, Ip4Addr &addr);
+    static int GetPeerAddr(int fd, Ip4Addr& addr);
 
    private:
     int fd_;

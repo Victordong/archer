@@ -9,7 +9,7 @@ TcpServerPtr TcpServer::InitServer(int num,
                                    unsigned short port,
                                    bool reuse_port,
                                    LoadMode mode) {
-    auto server = std::make_shared<TcpServer>(TcpServer(num, host, port));
+    auto server = std::make_shared<TcpServer>(num, host, port);
     server->mode_ = mode;
     server->acceptor_.reset(new Acceptor(host, port, reuse_port));
     server->acceptor_->set_new_conncb_(
@@ -68,13 +68,10 @@ void TcpServer::Start() {
     acceptor_->Listen();
 
     std::vector<std::thread> threads;
-    threads.push_back(std::thread([&]() { acceptor_->RunLoop(); }));
     for (auto& reactor : reactors_) {
         threads.push_back(std::thread([&]() { reactor->Loop(); }));
     }
-    for (auto& thread : threads) {
-        thread.join();
-    }
+    acceptor_->RunLoop();
 }
 
 Eventloop* TcpServer::getSubReactors() {
@@ -86,8 +83,8 @@ Eventloop* TcpServer::getSubReactors() {
             break;
         case LoadMode::LeastConnections:
             number = 0;
-            for (int i = 1; i < reactors_.size();i++) {
-                if(reactors_[i]->total() < reactors_[number]->total()) {
+            for (int i = 1; i < reactors_.size(); i++) {
+                if (reactors_[i]->total() < reactors_[number]->total()) {
                     number = i;
                 }
             }
@@ -108,7 +105,7 @@ HSHAPtr HSHA::InitServer(int num,
                          const std::string& host,
                          unsigned short port,
                          bool reuse_port) {
-    auto server = std::make_shared<HSHA>(HSHA(num, pool_size, host, port));
+    auto server = std::make_shared<HSHA>(num, pool_size, host, port);
 
     server->acceptor_.reset(new Acceptor(host, port, reuse_port));
     server->acceptor_->set_new_conncb_(

@@ -31,7 +31,7 @@ class TcpConn : public std::enable_shared_from_this<TcpConn>, noncopyable {
                                        unsigned short port,
                                        int timeout = 0,
                                        const std::string& local_ip = "") {
-        TcpConnPtr conn = std::make_shared<TcpConn>(TcpConn());
+        TcpConnPtr conn = std::make_shared<TcpConn>();
         conn->Connect(loop, host, port, timeout, local_ip);
         return conn;
     }
@@ -40,7 +40,7 @@ class TcpConn : public std::enable_shared_from_this<TcpConn>, noncopyable {
                                        int fd,
                                        Ip4Addr local_addr,
                                        Ip4Addr peer_addr) {
-        TcpConnPtr conn = std::make_shared<TcpConn>(TcpConn());
+        TcpConnPtr conn = std::make_shared<TcpConn>();
         conn->attach(loop, fd, local_addr, peer_addr);
         return conn;
     }

@@ -3,21 +3,31 @@ load("@rules_cc//cc:defs.bzl", "cc_binary", "cc_library")
 cc_library(
     name = "net",
     srcs = [
+        "acceptor.cpp",
+        "codec.cpp",
         "eventloop/channel.cpp",
         "eventloop/eventloop.cpp",
         "poller/epoll_poller.cpp",
         "poller/poller.cpp",
+        "tcp_conn.cpp",
+        "tcp_server.cpp",
+        "timer/idle.cpp",
         "timer/timer.cpp",
         "timer/timer_queue.cpp",
     ],
     hdrs = [
+        "acceptor.hpp",
+        "archer_imp.hpp",
+        "codec.hpp",
         "eventloop/channel.hpp",
         "eventloop/eventloop.hpp",
         "poller/epoll_poller.hpp",
         "poller/poller.hpp",
+        "tcp_conn.hpp",
+        "tcp_server.hpp",
+        "timer/idle.hpp",
         "timer/timer.hpp",
         "timer/timer_queue.hpp",
-        "type.hpp",
     ],
     linkopts = ["-pthread"],
     deps = [
@@ -26,9 +36,20 @@ cc_library(
 )
 
 cc_binary(
-    name = "event_test",
+    name = "timer_test",
     srcs = [
         "tests/timer_test.cpp",
+    ],
+    linkopts = ["-pthread"],
+    deps = [
+        ":net",
+    ],
+)
+
+cc_binary(
+    name = "echo_test",
+    srcs = [
+        "tests/echo_test.cpp",
     ],
     linkopts = ["-pthread"],
     deps = [
