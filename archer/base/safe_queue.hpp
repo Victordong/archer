@@ -54,7 +54,7 @@ void SafeQueue<T>::Exit() {
 template <typename T>
 bool SafeQueue<T>::Push(T&& t) {
     std::lock_guard<std::mutex> lk(*this);
-    if (!exit_) {
+    if (exit_) {
         return false;
     }
     items_.push_back(std::move(t));

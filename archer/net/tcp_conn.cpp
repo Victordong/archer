@@ -154,14 +154,6 @@ void TcpConn::Send(Buffer& msg) {
     loop_->RunInLoop([&]() {
         if (channel_) {
             output_->Append(msg);
-            if (output_->size()) {
-                std::cout << output_->size() << std::endl;
-            }
-
-            if (!channel_->WriteEnabled()) {
-                std::cout << "不可写" << std::endl;
-            }
-
             if (output_->size() && !channel_->WriteEnabled()) {
                 channel_->EnableWriting();
             }
@@ -170,6 +162,12 @@ void TcpConn::Send(Buffer& msg) {
 }
 
 void TcpConn::SendMsg(Slice& msg) {
+    codec_->Encode(msg, *output_);
+    SendOutPut();
+}
+
+void TcpConn::SendMsg(const std::string& s) {
+    Slice msg(s);
     codec_->Encode(msg, *output_);
     SendOutPut();
 }
@@ -250,7 +248,7 @@ void TcpConn::Cleanup(const TcpConnPtr& conn) {
 
     codec_.reset();
 
-    readcb_ = writcb_ = statecb_ = closecb_ = nullptr;
+    readcb_ = statecb_ = closecb_ = nullptr;
 }
 
 void TcpConn::AddIdleCB(int idle, const TcpCallback& cb) {

@@ -13,16 +13,16 @@ namespace archer {
 
 static size_t kMallocSize = 1024;
 
+enum ConnState {
+    Invalid,
+    Handshaking,
+    Connected,
+    Closed,
+    Error,
+};
+
 class TcpConn : public std::enable_shared_from_this<TcpConn>, noncopyable {
    public:
-    enum ConnState {
-        Invalid,
-        Handshaking,
-        Connected,
-        Closed,
-        Error,
-    };
-
     TcpConn();
     ~TcpConn();
 
@@ -65,10 +65,9 @@ class TcpConn : public std::enable_shared_from_this<TcpConn>, noncopyable {
     void SendOutPut() { Send(*output_); };
 
     void SendMsg(Slice &s);
-    void SendMsg(const std::string& s) { SendMsg(Slice(s)); };
+    void SendMsg(const std::string& s);
 
     void OnRead(const TcpCallback& cb) { readcb_ = cb; };
-    void OnWrite(const TcpCallback& cb) { writcb_ = cb; };
     void OnState(const TcpCallback& cb) { statecb_ = cb; };
     void OnMsg(CodecImp* codec, const TcpMsgCallBack& cb);
     void OnClose(const TcpCallback& cb) { closecb_ = cb; };
@@ -117,7 +116,7 @@ class TcpConn : public std::enable_shared_from_this<TcpConn>, noncopyable {
 
     BufferPtr output_, input_;
 
-    TcpCallback readcb_, writcb_, statecb_, closecb_;
+    TcpCallback readcb_, statecb_, closecb_;
 
     TimerId timerout_id_;
 

@@ -88,9 +88,9 @@ class HSHA : public TcpServer {
         thread_pool_.Join();
     };
 
-    void OnConnMsg(const RetMsgCallBack& cb, CodecImp* codec);
+    virtual void OnConnMsg(const RetMsgCallBack& cb, CodecImp* codec);
 
-    void Start();
+    virtual void Start();
 
    private:
     ThreadPool thread_pool_;

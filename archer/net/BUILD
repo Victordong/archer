@@ -56,3 +56,15 @@ cc_binary(
         ":net",
     ],
 )
+
+
+cc_binary(
+    name = "msg_test",
+    srcs = [
+        "tests/msg_test.cpp",
+    ],
+    linkopts = ["-pthread"],
+    deps = [
+        ":net",
+    ],
+)
