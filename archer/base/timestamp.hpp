@@ -7,11 +7,13 @@
 
 namespace archer {
 
+using timestamp_t = long int;
+
 class Timestamp final {
    public:
     Timestamp() : micro_seconds_(0){};
 
-    explicit Timestamp(int ms) : micro_seconds_(ms){};
+    explicit Timestamp(timestamp_t ms) : micro_seconds_(ms){};
 
     Timestamp(const Timestamp& ts) : micro_seconds_(ts.micro_seconds_){};
 
@@ -40,10 +42,11 @@ class Timestamp final {
         return *this;
     }
 
-    int expiration() {
+    timestamp_t expiration() {
         struct timeval tv;
         gettimeofday(&tv, nullptr);
-        int ms = int(tv.tv_sec) * kMicroSecondsPerSecond + int(tv.tv_usec);
+        timestamp_t ms = timestamp_t(tv.tv_sec) * kMicroSecondsPerSecond +
+                         timestamp_t(tv.tv_usec);
         return micro_seconds_ - ms;
     };
 
@@ -55,12 +58,13 @@ class Timestamp final {
     static Timestamp Now() {
         struct timeval tv;
         gettimeofday(&tv, nullptr);
-        int ms = int(tv.tv_sec) * kMicroSecondsPerSecond + int(tv.tv_usec);
+        timestamp_t ms = timestamp_t(tv.tv_sec) * kMicroSecondsPerSecond +
+                         timestamp_t(tv.tv_usec);
         return Timestamp(ms);
     };
 
    private:
-    int micro_seconds_;
+    timestamp_t micro_seconds_;
 };
 
 };  // namespace archer

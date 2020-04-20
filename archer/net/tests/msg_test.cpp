@@ -12,12 +12,14 @@ int main(int argc, char const* argv[]) {
         switch (conn->state()) {
             case archer::ConnState::Connected:
                 std::cout << "connected" << std::endl;
+                conn->AddIdleCB(
+                    10, [](const archer::TcpConnPtr& conn) { conn->Close(); });
                 break;
             case archer::ConnState::Closed:
                 std::cout << "closed" << std::endl;
                 break;
             case archer::ConnState::Error:
-                std::cout << "closed" << std::endl;
+                std::cout << "error" << std::endl;
                 break;
             default:
                 break;

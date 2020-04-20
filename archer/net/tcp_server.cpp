@@ -29,8 +29,6 @@ void TcpServer::handleAccept(int fd, Ip4Addr local_addr, Ip4Addr peer_addr) {
     auto reactor = getSubReactors();
 
     reactor->RunInLoop([=]() {
-        conn->attach(reactor, fd, local_addr, peer_addr);
-
         if (statecb_) {
             conn->OnState(statecb_);
         }
@@ -42,6 +40,8 @@ void TcpServer::handleAccept(int fd, Ip4Addr local_addr, Ip4Addr peer_addr) {
         if (msgcb_) {
             conn->OnMsg(codec_->Clone(), msgcb_);
         }
+
+        conn->attach(reactor, fd, local_addr, peer_addr);
 
         conn->OnClose([=](const TcpConnPtr& conn) { handleClose(conn); });
 

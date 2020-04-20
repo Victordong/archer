@@ -24,7 +24,7 @@ class TimerQueue : noncopyable {
 
     TimerId AddTimer(const TimerCallback& cb,
                      const Timestamp& when,
-                     int interval = 0);
+                     timestamp_t interval = 0);
 
     void AddTimerInLoop(const TimerPtr& timer);
 

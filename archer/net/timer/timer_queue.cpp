@@ -21,7 +21,7 @@ TimerQueue::~TimerQueue() {}
 
 TimerId TimerQueue::AddTimer(const TimerCallback& cb,
                              const Timestamp& ts,
-                             int interval) {
+                             timestamp_t interval) {
     TimerPtr timer_ptr(new Timer(cb, ts, interval));
 
     loop_->RunInLoop([=]() { this->AddTimerInLoop(timer_ptr); });

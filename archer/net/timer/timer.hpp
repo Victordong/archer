@@ -16,11 +16,14 @@ class Timer : noncopyable {
         Error,
     };
 
-    Timer(const TimerCallback& cb, const Timestamp& when, int interval, TimerStatus status=Pending);
+    Timer(const TimerCallback& cb,
+          const Timestamp& when,
+          timestamp_t interval,
+          TimerStatus status = Pending);
 
-    int expiration();
+    timestamp_t expiration();
 
-    int interval() { return interval_; };
+    timestamp_t interval() { return interval_; };
 
     Timestamp when() { return when_; };
 
@@ -42,7 +45,7 @@ class Timer : noncopyable {
     Timestamp when_;
     TimerCallback timer_callback_;
 
-    int interval_;
+    timestamp_t interval_;
     bool repeat_;
 
     TimerStatus status_;

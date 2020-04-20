@@ -53,7 +53,9 @@ class TcpConn : public std::enable_shared_from_this<TcpConn>, noncopyable {
     bool writeable() {
         return channel_ ? channel_->revents() & archer::kWriteEvent : false;
     };
-    void set_reconnect_interval(int milli) { reconnect_interval_ = milli; };
+    void set_reconnect_interval(timestamp_t milli) {
+        reconnect_interval_ = milli;
+    };
     Buffer& output() { return *output_; };
     Buffer& input() { return *input_; };
 

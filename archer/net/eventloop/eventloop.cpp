@@ -102,11 +102,11 @@ TimerId Eventloop::RunAt(const TimerCallback& cb, const Timestamp& time) {
     return timer_queue_->AddTimer(cb, time);
 }
 
-TimerId Eventloop::RunAfter(const TimerCallback& cb, int delay) {
+TimerId Eventloop::RunAfter(const TimerCallback& cb, timestamp_t delay) {
     return timer_queue_->AddTimer(cb, Timestamp::Now() + delay);
 }
 
-TimerId Eventloop::RunEvery(const TimerCallback& cb, double interval) {
+TimerId Eventloop::RunEvery(const TimerCallback& cb, timestamp_t interval) {
     return timer_queue_->AddTimer(cb, Timestamp::Now() + interval, interval);
 }
 
@@ -138,7 +138,8 @@ IdleId Eventloop::RegisterIdle(int idle,
         idle_enabled_ = true;
         RunEvery([=]() { callIdles(); }, Timestamp::kMicroSecondsPerSecond);
     }
-    auto lst = idle_map_[idle];
+    auto &lst = idle_map_[idle];
+    auto now = Timestamp::Now();
     lst.push_back(IdleNode(conn, cb, Timestamp::Now()));
     return IdleId(new Idle(&lst, --lst.end()));
 }
