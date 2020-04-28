@@ -8,9 +8,8 @@ TcpServerPtr TcpServer::InitServer(int num,
                                    const std::string& host,
                                    unsigned short port,
                                    bool reuse_port,
-                                   LoadMode mode) {
-    auto server = std::make_shared<TcpServer>(num, host, port);
-    server->mode_ = mode;
+                                   LoadBalanceABC* lb) {
+    auto server = std::make_shared<TcpServer>(num, host, port, lb);
     server->acceptor_.reset(new Acceptor(host, port, reuse_port));
     server->acceptor_->set_new_conncb_(
         [server](int fd, Ip4Addr local_addr, Ip4Addr peer_addr) {
@@ -26,7 +25,8 @@ TcpServerPtr TcpServer::InitServer(int num,
 void TcpServer::handleAccept(int fd, Ip4Addr local_addr, Ip4Addr peer_addr) {
     auto conn = this->conncb_();
     conn_map_.insert(std::pair<int, TcpConnPtr>(fd, conn));
-    auto reactor = getSubReactors();
+
+    auto reactor = load_balance_->GetEventLoop(this, reactors_);
 
     reactor->RunInLoop([=]() {
         if (statecb_) {
@@ -66,32 +66,6 @@ void TcpServer::Start() {
         threads.push_back(std::thread([&]() { reactor->Loop(); }));
     }
     acceptor_->RunLoop();
-}
-
-Eventloop* TcpServer::getSubReactors() {
-    Eventloop* loop;
-    uint64_t number;
-    switch (mode_) {
-        case LoadMode::RoundRoBin:
-            number = total_connections_ % reactors_num_;
-            break;
-        case LoadMode::LeastConnections:
-            number = 0;
-            for (int i = 1; i < reactors_.size(); i++) {
-                if (reactors_[i]->total() < reactors_[number]->total()) {
-                    number = i;
-                }
-            }
-            break;
-        case LoadMode::Random:
-            srand((unsigned)time(NULL));
-            number = rand() % 4;
-            break;
-        default:
-            number = 0;
-            break;
-    }
-    return reactors_[number].get();
 }
 
 HSHAPtr HSHA::InitServer(int num,

@@ -4,6 +4,7 @@
 #include "archer/base/thread.hpp"
 #include "archer/net/codec.hpp"
 #include "archer/net/eventloop/eventloop.hpp"
+#include "archer/net/load_balance.hpp"
 #include "archer/net/tcp_conn.hpp"
 
 namespace archer {
@@ -12,10 +13,14 @@ enum LoadMode { RoundRoBin, LeastConnections, Random };
 
 class TcpServer : noncopyable {
    public:
-    TcpServer(int num, const std::string& host = "", unsigned short port = 8080)
+    TcpServer(int num,
+              const std::string& host = "",
+              unsigned short port = 8080,
+              LoadBalanceABC* lb = new RoundRoBinLB())
         : addr_(host, port),
           reactors_num_(num),
           reactors_(num),
+          load_balance_(lb),
           conncb_([]() -> TcpConnPtr { return std::make_shared<TcpConn>(); }){};
 
     ~TcpServer(){};
@@ -24,7 +29,7 @@ class TcpServer : noncopyable {
                                    const std::string& host,
                                    unsigned short port,
                                    bool reuse_port = false,
-                                   LoadMode mode = LoadMode::RoundRoBin);
+                                   LoadBalanceABC* lb = new RoundRoBinLB());
 
     Ip4Addr addr() { return addr_; };
 
@@ -40,18 +45,20 @@ class TcpServer : noncopyable {
     virtual void handleAccept(int fd, Ip4Addr local_addr, Ip4Addr peer_addr);
     virtual void handleClose(const TcpConnPtr& conn);
 
-    Eventloop* getSubReactors();
-
     virtual void Start();
 
+    uint64_t total_connections() const { return total_connections_; };
+
+    uint64_t reactors_num() const { return reactors_num_; };
+
    protected:
-    int reactors_num_;
+    uint64_t reactors_num_;
 
     std::unique_ptr<Acceptor> acceptor_;
     std::vector<std::unique_ptr<Eventloop>> reactors_;
 
     Ip4Addr addr_;
-    LoadMode mode_;
+    std::unique_ptr<LoadBalanceABC> load_balance_;
 
     TcpCallback readcb_, statecb_, closecb_;
     TcpMsgCallBack msgcb_;
