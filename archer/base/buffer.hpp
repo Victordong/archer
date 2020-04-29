@@ -80,14 +80,13 @@ class Buffer {
     void Clear() {
         write_pos_ = 0;
         read_pos_ = 0;
-        buf_.clear();
     }
 
     size_t size() const { return write_pos_ - read_pos_; };
 
-    bool empty() { return write_pos_ - read_pos_ == cap_; };
+    bool empty() { return write_pos_ == read_pos_; };
 
-    bool full() { return read_pos_ == write_pos_; };
+    bool full() { return write_pos_ - read_pos_ == cap_; };
 
     char* data() { return buf_.data(); };
 

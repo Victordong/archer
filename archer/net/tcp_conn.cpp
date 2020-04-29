@@ -2,7 +2,7 @@
 using namespace archer;
 
 TcpConn::TcpConn()
-    : state_(ConnState::Invalid), output_(new Buffer), input_(new Buffer) {}
+    : state_(ConnState::Invalid), output_(new Buffer()), input_(new Buffer()) {}
 
 TcpConn::~TcpConn() {}
 
@@ -29,6 +29,7 @@ void TcpConn::attach(Eventloop* loop, int fd, Ip4Addr local, Ip4Addr peer) {
                 handleHandShake(conn);
             }
         });
+        channel_->EnableWriting();
     } else {
         handleHandShake(conn);
     }
@@ -113,7 +114,7 @@ void TcpConn::handleClose(const TcpConnPtr& conn) {
 }
 
 void TcpConn::handleError(const TcpConnPtr& conn) {
-    if (state_ != Error) {
+    if (state_ != ConnState::Error) {
         state_ = ConnState::Error;
         if (statecb_) {
             statecb_(conn);
@@ -132,7 +133,7 @@ void TcpConn::handleHandShake(const TcpConnPtr& conn) {
     state_ = ConnState::Connected;
     channel_->set_read_callback([=]() { conn->handleRead(conn); });
     channel_->set_write_callback([=]() { conn->handleWrite(conn); });
-    channel_->set_error_callback([=]() { conn->handleError(conn); });
+    // channel_->set_error_callback([=]() { conn->handleError(conn); });
     channel_->EnableReading();
     if (statecb_) {
         statecb_(conn);
@@ -144,7 +145,7 @@ void TcpConn::Send(const char* msg, size_t len) {
         if (channel_) {
             output_->Append(msg, len);
             if (output_->size() && !channel_->WriteEnabled()) {
-                channel_->WriteEnabled();
+                channel_->EnableWriting();
             }
         }
     });

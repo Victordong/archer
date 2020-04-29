@@ -7,6 +7,7 @@ cc_library(
         "codec.cpp",
         "eventloop/channel.cpp",
         "eventloop/eventloop.cpp",
+        "load_balance.cpp",
         "poller/epoll_poller.cpp",
         "poller/poller.cpp",
         "tcp_conn.cpp",
@@ -21,6 +22,7 @@ cc_library(
         "codec.hpp",
         "eventloop/channel.hpp",
         "eventloop/eventloop.hpp",
+        "load_balance.hpp",
         "poller/epoll_poller.hpp",
         "poller/poller.hpp",
         "tcp_conn.hpp",
@@ -57,11 +59,21 @@ cc_binary(
     ],
 )
 
-
 cc_binary(
     name = "msg_test",
     srcs = [
         "tests/msg_test.cpp",
+    ],
+    linkopts = ["-pthread"],
+    deps = [
+        ":net",
+    ],
+)
+
+cc_binary(
+    name = "client_test",
+    srcs = [
+        "tests/client_test.cpp",
     ],
     linkopts = ["-pthread"],
     deps = [
