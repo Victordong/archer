@@ -11,7 +11,7 @@ Buffer& Buffer::Append(const char* p, size_t len) {
 }
 
 Buffer& Buffer::malloc(size_t len) {
-    if (space() + pre_space() > len) {
+    if (space() + pre_space() >= len) {
         std::copy(begin(), end(), data());
     } else {
         auto new_size = size() + len;

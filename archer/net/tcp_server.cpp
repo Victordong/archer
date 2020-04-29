@@ -97,7 +97,11 @@ void HSHA::OnConnMsg(const RetMsgCallBack& cb, CodecImp* codec) {
             std::string msg = slice;
             thread_pool_.AddTask([=]() {
                 auto result = cb(conn, msg);
-                conn->loop()->RunInLoop([=]() { conn->SendMsg(Slice(result)); });
+                conn->loop()->RunInLoop([=]() { 
+                    if(conn->state()==ConnState::Connected) {
+                        conn->SendMsg(Slice(result));
+                    }
+                     });
             });
         },
         codec);

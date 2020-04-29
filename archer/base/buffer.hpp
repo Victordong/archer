@@ -106,7 +106,7 @@ class Buffer {
 
     Buffer& Append(Slice slice) { return Append(slice.data(), slice.size()); }
 
-    Buffer& Append(const char* p) { return Append(p, sizeof(p)); };
+    Buffer& Append(const char* p) { return Append(p, strlen(p)); };
 
     Buffer& Append(const std::string& s) { return Append(s.data(), s.size()); };
 
