@@ -7,6 +7,7 @@
 #include "archer/net/codec.hpp"
 #include "archer/net/eventloop/channel.hpp"
 #include "archer/net/eventloop/eventloop.hpp"
+#include "archer/base/context.hpp"
 
 namespace archer {
 
@@ -34,7 +35,7 @@ class TcpConn : public std::enable_shared_from_this<TcpConn>, noncopyable {
         TcpConnPtr conn = std::make_shared<TcpConn>();
         conn->Connect(loop, host, port, timeout, local_ip);
         return conn;
-    }
+    };
 
     static TcpConnPtr CreateConnection(Eventloop* loop,
                                        int fd,
@@ -43,7 +44,7 @@ class TcpConn : public std::enable_shared_from_this<TcpConn>, noncopyable {
         TcpConnPtr conn = std::make_shared<TcpConn>();
         conn->attach(loop, fd, local_addr, peer_addr);
         return conn;
-    }
+    };
 
     bool isClient() { return dest_port_ > 0; };
 
@@ -106,10 +107,15 @@ class TcpConn : public std::enable_shared_from_this<TcpConn>, noncopyable {
 
     virtual int readImp(int fd, void* buf, size_t size) {
         return ::read(fd, buf, size);
-    }
+    };
     virtual int writeImp(int fd, const void* buf, size_t size) {
         return ::write(fd, buf, size);
-    }
+    };
+
+    template <class T>
+    T& context(){
+        return ctx_.context<T>();
+    };
 
    private:
     Eventloop* loop_;
@@ -119,6 +125,8 @@ class TcpConn : public std::enable_shared_from_this<TcpConn>, noncopyable {
     BufferPtr output_, input_;
 
     TcpCallback readcb_, statecb_, closecb_;
+
+    AutoContext ctx_;
 
     TimerId timerout_id_;
 
