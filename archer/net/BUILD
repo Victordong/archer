@@ -30,7 +30,6 @@ cc_library(
         "timer/idle.hpp",
         "timer/timer.hpp",
         "timer/timer_queue.hpp",
-        "context.hpp"
     ],
     linkopts = ["-pthread"],
     deps = [

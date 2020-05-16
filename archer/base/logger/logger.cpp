@@ -4,7 +4,7 @@
 
 using namespace archer;
 
-Logger::Logger(LogCallBack cb) {
+Logger::Logger(LogCallBack cb) : log_cb_(cb) {
     std::thread t([this]() {
         while (!tasks_.exited()) {
             LogTask t;
@@ -13,6 +13,7 @@ Logger::Logger(LogCallBack cb) {
             }
         }
     });
+    log_thread_.swap(t);
 }
 
 Logger* Logger::GetLogger() {

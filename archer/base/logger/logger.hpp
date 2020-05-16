@@ -3,6 +3,7 @@
 
 #include <iostream>
 #include <map>
+#include <thread>
 
 #include "archer/base/noncopyable.hpp"
 #include "archer/base/safe_queue.hpp"
@@ -43,9 +44,10 @@ class Logger : noncopyable {
    private:
     Logger(LogCallBack log_cb = default_log);
     inline static Logger* logger_ = nullptr;
-    inline static std::mutex lock_ = std::mutex();
+    inline static std::mutex lock_;
     SafeQueue<LogTask> tasks_;
     LogCallBack log_cb_;
+    std::thread log_thread_;
 };
 
 class WarnLogger : noncopyable {
@@ -92,10 +94,10 @@ class DebugLogger : noncopyable {
     }
 };
 
-inline WarnLogger WARN_LOG = WarnLogger();
-inline DebugLogger DEBUG_LOG = DebugLogger();
-inline InfoLogger INFO_LOG = InfoLogger();
-inline ErrorLogger ERR_LOG = ErrorLogger();
+inline WarnLogger WARN_LOG;
+inline DebugLogger DEBUG_LOG;
+inline InfoLogger INFO_LOG;
+inline ErrorLogger ERR_LOG;
 
 };  // namespace archer
 
