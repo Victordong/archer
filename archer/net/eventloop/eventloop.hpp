@@ -1,9 +1,8 @@
 #ifndef _ARCHER_EVENTLOOP_HPP
 #define _ARCHER_EVENTLOOP_HPP
 
-#include "archer/net/archer_imp.hpp"
-
 #include "archer/base/noncopyable.hpp"
+#include "archer/net/archer_imp.hpp"
 
 namespace archer {
 
@@ -34,7 +33,7 @@ class Eventloop final : noncopyable {
     void QueueInLoop(const Functor& func);
 
     void callIdles();
-    IdleId RegisterIdle(int idle,const TcpConnPtr & ptr,const TcpCallback& cb);
+    IdleId RegisterIdle(int idle, const TcpConnPtr& ptr, const TcpCallback& cb);
     void UnRegisterIdle(const IdleId&);
     void UpdateIdle(const IdleId&);
 
@@ -56,7 +55,7 @@ class Eventloop final : noncopyable {
     std::atomic_bool looping_;
     std::atomic_bool do_pending_;
 
-    std::shared_ptr<Poller> poller_;
+    std::unique_ptr<Poller> poller_;
     ChannelList active_channels_;
 
     Socket wakeup_fd_;
