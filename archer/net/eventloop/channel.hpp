@@ -69,7 +69,6 @@ class Channel : noncopyable {
     const Socket fd_;
     int events_;
     int revents_;
-    int index_;
 
     EventCallback read_callback_;
     EventCallback write_callback_;
